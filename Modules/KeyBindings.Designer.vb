@@ -1,4 +1,5 @@
 ﻿Sub bindKeys()
+'This is Joseph just messing around on the branch, feel free to delete
     Application.OnKey "{LEFT}", "moveLeft"
 Application.OnKey "{RIGHT}", "moveRight"
 Application.OnKey "{UP}", "moveUp"

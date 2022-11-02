@@ -24,8 +24,8 @@ Public gate As Integer
 Dim r() As Integer, c() As Integer
 Sub StartGame()
     Cells.Clear
-    Range("C3:AN27").Interior.Color = vbBlack
-    Range("C3:AN27").Font.Size = 18
+    Range("E5:AN32").Interior.Color = vbBlack
+    Range("E5:AN32").Font.Size = 18
     ' Non Collidable
     shrub = 1
     rock = 2
@@ -43,23 +43,28 @@ Sub StartGame()
     ' Changing states
     gate = 13
 
-    Range("AA14").Value = trap
-    Range("AA22:AA24").Value = gate
-    Range("J4").Value = mushroom
-    Range("O4").Value = puddle
-    Range("S4").Value = rock
-    Range("X4").Value = shrub
-    Range("AB4").Value = flower
-    Range("AG4").Value = shop
-    Range("AK4").Value = firefly
-    Range("AA14").Font.Color = vbRed
-    Range("X16").Value = key
-    Range("X16").Font.ColorIndex = 26
-    Range("H10").Value = battery
-    Range("H10").Font.Color = vbGreen
-    Range("E20:AA21").Value = wall
-    Range("E21:F27").Value = wall
-    Range("I25:AA27").Value = wall
+    Range("AA18").Value = trap
+    Range("AA26:AA28").Value = gate
+    Range("J8").Value = mushroom
+    Range("O8").Value = puddle
+    Range("S8").Value = rock
+    Range("X8").Value = shrub
+    Range("AB8").Value = flower
+    Range("AG8").Value = shop
+    Range("AK8").Value = firefly
+    Range("AA18").Font.Color = vbRed
+    Range("X20").Value = key
+    Range("X20").Font.ColorIndex = 26
+    Range("H14").Value = battery
+    Range("H14").Font.Color = vbGreen
+    Range("A1:AR4").Value = wall
+    Range("AO5:AR36").Value = wall
+    Range("A33:AN36").Value = wall
+    Range("A5:D32").Value = wall
+    Range("A1:AR4").Interior.Color = vbBlack
+    Range("AO5:AR36").Interior.Color = vbBlack
+    Range("A33:AN36").Interior.Color = vbBlack
+    Range("A5:D32").Interior.Color = vbBlack
     Range("AW3").Font.Size = 20
     ReDim r(1)
     ReDim c(1)
@@ -151,6 +156,9 @@ Sub interact()
     End If
     If Cells(r(0), c(0) - 1).Value = gate Or Cells(r(0), c(0) + 1).Value = gate Or Cells(r(0) + 1, c(0)).Value = gate Or Cells(r(0) - 1, c(0)).Value = gate Then
         Range("AW3").Value = "This is a gate"
+    End If
+    If Cells(r(0), c(0) - 1).Value = wall Or Cells(r(0), c(0) + 1).Value = wall Or Cells(r(0) + 1, c(0)).Value = wall Or Cells(r(0) - 1, c(0)).Value = wall Then
+        Range("AW3").Value = "This is a wall"
     End If
 End Sub
 Sub Hit()

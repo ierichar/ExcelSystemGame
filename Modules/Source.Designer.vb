@@ -66,13 +66,13 @@ Sub StartGame()
     r(0) = 10
     c(0) = 10
     rinc = 0 : cinc = 0
-    vis = 0
+    vis = 1
     steps = 0
     isPickedUp = False
     bindKeys
     ActionKey()
-    ShowPlayer()
     ShowVis()
+    ShowPlayer()
     Hit()
     interact()
 
@@ -84,129 +84,40 @@ Sub ShowPlayer()
     Cells(r(0), c(0)).Interior.Color = vbRed
 End Sub
 Sub ShowVis()
-    If vis = 2 Then
-        If (Cells(r(0) + 2, c(0)).Interior.Color = vbBlack And Cells(r(0) + 2, c(0)).Value <> wall) Then
-            Cells(r(0) + 2, c(0)).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) + 2, c(0) + 2).Interior.Color = vbBlack And Cells(r(0) + 2, c(0) + 2).Value <> wall) Then
-            Cells(r(0) + 2, c(0) + 2).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0), c(0) + 2).Interior.Color = vbBlack And Cells(r(0), c(0) + 2).Value <> wall) Then
-            Cells(r(0), c(0) + 2).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) - 2, c(0)).Interior.Color = vbBlack And Cells(r(0) - 2, c(0)).Value <> wall) Then
-            Cells(r(0) - 2, c(0)).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) - 2, c(0) - 2).Interior.Color = vbBlack And Cells(r(0) - 2, c(0) - 2).Value <> wall) Then
-            Cells(r(0) - 2, c(0) - 2).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0), c(0) - 2).Interior.Color = vbBlack And Cells(r(0), c(0) - 2).Value <> wall) Then
-            Cells(r(0), c(0) - 2).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) + 2, c(0) - 2).Interior.Color = vbBlack And Cells(r(0) + 2, c(0) - 2).Value <> wall) Then
-            Cells(r(0) + 2, c(0) - 2).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) - 2, c(0) + 2).Interior.Color = vbBlack And Cells(r(0) - 2, c(0) + 2).Value <> wall) Then
-            Cells(r(0) - 2, c(0) + 2).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) + 1, c(0)).Interior.Color = vbBlack And Cells(r(0) + 1, c(0)).Value <> wall) Then
-            Cells(r(0) + 1, c(0)).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) + 1, c(0) + 1).Interior.Color = vbBlack And Cells(r(0) + 1, c(0) + 1).Value <> wall) Then
-            Cells(r(0) + 1, c(0) + 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0), c(0) + 1).Interior.Color = vbBlack And Cells(r(0), c(0) + 1).Value <> wall) Then
-            Cells(r(0), c(0) + 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) - 1, c(0)).Interior.Color = vbBlack And Cells(r(0) - 1, c(0)).Value <> wall) Then
-            Cells(r(0) - 1, c(0)).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) - 1, c(0) - 1).Interior.Color = vbBlack And Cells(r(0) - 1, c(0) - 1).Value <> wall) Then
-            Cells(r(0) - 1, c(0) - 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0), c(0) - 1).Interior.Color = vbBlack And Cells(r(0), c(0) - 1).Value <> wall) Then
-            Cells(r(0), c(0) - 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) + 1, c(0) - 1).Interior.Color = vbBlack And Cells(r(0) + 1, c(0) - 1).Value <> wall) Then
-            Cells(r(0) + 1, c(0) - 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) - 1, c(0) + 1).Interior.Color = vbBlack And Cells(r(0) - 1, c(0) + 1).Value <> wall) Then
-            Cells(r(0) - 1, c(0) + 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) - 2, c(0) + 1).Interior.Color = vbBlack And Cells(r(0) - 2, c(0) + 1).Value <> wall) Then
-            Cells(r(0) - 2, c(0) + 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) - 1, c(0) + 2).Interior.Color = vbBlack And Cells(r(0) - 1, c(0) + 2).Value <> wall) Then
-            Cells(r(0) - 1, c(0) + 2).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) + 2, c(0) + 1).Interior.Color = vbBlack And Cells(r(0) + 2, c(0) + 1).Value <> wall) Then
-            Cells(r(0) + 2, c(0) + 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) + 1, c(0) + 2).Interior.Color = vbBlack And Cells(r(0) + 1, c(0) + 2).Value <> wall) Then
-            Cells(r(0) + 1, c(0) + 2).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) - 2, c(0) - 1).Interior.Color = vbBlack And Cells(r(0) - 2, c(0) - 1).Value <> wall) Then
-            Cells(r(0) - 2, c(0) - 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) - 1, c(0) - 2).Interior.Color = vbBlack And Cells(r(0) - 1, c(0) - 2).Value <> wall) Then
-            Cells(r(0) - 1, c(0) - 2).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) + 2, c(0) - 1).Interior.Color = vbBlack And Cells(r(0) + 2, c(0) - 1).Value <> wall) Then
-            Cells(r(0) + 2, c(0) - 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) + 1, c(0) - 2).Interior.Color = vbBlack And Cells(r(0) + 1, c(0) - 2).Value <> wall) Then
-            Cells(r(0) + 1, c(0) - 2).Interior.Color = vbBlue
-        End If
-    End If
-
-    If vis = 1 Then
-        If (Cells(r(0) + 1, c(0)).Interior.Color = vbBlack And Cells(r(0) + 1, c(0)).Value <> wall) Then
-            Cells(r(0) + 1, c(0)).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) + 1, c(0) + 1).Interior.Color = vbBlack And Cells(r(0) + 1, c(0) + 1).Value <> wall) Then
-            Cells(r(0) + 1, c(0) + 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0), c(0) + 1).Interior.Color = vbBlack And Cells(r(0), c(0) + 1).Value <> wall) Then
-            Cells(r(0), c(0) + 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) - 1, c(0)).Interior.Color = vbBlack And Cells(r(0) - 1, c(0)).Value <> wall) Then
-            Cells(r(0) - 1, c(0)).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) - 1, c(0) - 1).Interior.Color = vbBlack And Cells(r(0) - 1, c(0) - 1).Value <> wall) Then
-            Cells(r(0) - 1, c(0) - 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0), c(0) - 1).Interior.Color = vbBlack And Cells(r(0), c(0) - 1).Value <> wall) Then
-            Cells(r(0), c(0) - 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) + 1, c(0) - 1).Interior.Color = vbBlack And Cells(r(0) + 1, c(0) - 1).Value <> wall) Then
-            Cells(r(0) + 1, c(0) - 1).Interior.Color = vbBlue
-        End If
-        If (Cells(r(0) - 1, c(0) + 1).Interior.Color = vbBlack And Cells(r(0) - 1, c(0) + 1).Value <> wall) Then
-            Cells(r(0) - 1, c(0) + 1).Interior.Color = vbBlue
-        End If
-
-    End If
+    Range(Cells(r(0) - vis, c(0) - vis), Cells(r(0) + vis, c(0) + vis)).Interior.ColorIndex = 15
 End Sub
 
 Sub MovePlayer()
     If rinc <> 0 Or cinc <> 0 Then
-
-        Cells(r(0), c(0)).Interior.Color = vbBlue
-        If (Cells(r(0) + rinc, c(0) + cinc).Interior.Color = vbBlack Or Cells(r(0) + rinc, c(0) + cinc).Interior.Color = vbBlue) Then
-
+        Cells(r(0), c(0)).Interior.ColorIndex = 15
+        If (Cells(r(0) + rinc, c(0) + cinc).Interior.Color = vbBlack Or Cells(r(0) + rinc, c(0) + cinc).Interior.ColorIndex = 15) Then
             If (Cells(r(0) + rinc, c(0) + cinc).Value >= 9 Or Cells(r(0) + rinc, c(0) + cinc).Value = 0) Then
                 If (Cells(r(0) + rinc, c(0) + cinc).Value <> gate Or isPickedUp = True) Then
                     r(0) = r(0) + rinc
                     c(0) = c(0) + cinc
                     steps = steps + 1
                     Range("B30").Value = steps
+
+                    If (rinc = 0 And cinc = 1) Then
+                        Range(Cells(r(0) - vis + -rinc, c(0) - vis + -cinc), Cells(r(0) + vis, c(0) - (vis * -cinc))).Interior.Color = vbBlack
+                    End If
+                    If (cinc = 0 And rinc = 1) Then
+                        Range(Cells(r(0) - vis + -rinc, c(0) - vis + -cinc), Cells(r(0) - (vis * -rinc), c(0) + vis)).Interior.Color = vbBlack
+                    End If
+                    If (cinc = 0 And rinc = -1) Then
+                        Range(Cells(r(0) + vis + -rinc, c(0) + vis + -cinc), Cells(r(0) + (vis * rinc), c(0) - vis)).Interior.Color = vbBlack
+                    End If
+                    If (cinc = -1 And rinc = 0) Then
+                        Range(Cells(r(0) + vis + -rinc, c(0) + vis + -cinc), Cells(r(0) - vis, c(0) - (vis * -cinc))).Interior.Color = vbBlack
+                    End If
                 End If
             End If
         End If
-        ShowPlayer()
+
         Hit()
         Recharge()
         ShowVis()
+        ShowPlayer()
 
         'Decay
     End If

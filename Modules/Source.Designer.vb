@@ -3,6 +3,7 @@
 Public rinc As Integer, cinc As Integer
 Public vis As Integer
 Public steps As Integer
+Public level As Integer
 
 Public isPickedUp As Boolean
 
@@ -19,6 +20,7 @@ Public battery As Integer
 Public puddle As Integer
 Public escape As Integer
 Public gate As Integer
+Public usb As Integer
 
 Public rockSearch As Boolean
 Public shrubSearch As Boolean
@@ -33,9 +35,15 @@ Public lightData As Integer
 
 Dim r() As Integer, c() As Integer
 Sub StartGame()
+    'Clear All Values
     Cells.Clear
+
+    'Set Bound of Level
     Range("E5:AN32").Interior.Color = vbBlack
     Range("E5:AN32").Font.Size = 18
+
+    'Sets Values for enviornment
+
     ' Non Collidable
     shrub = 1
     rock = 2
@@ -45,52 +53,33 @@ Sub StartGame()
     mushroom = 6
     puddle = 7
     firefly = 8
+
     ' Collidable
     trap = 9
     battery = 10
     key = 11
     usb = 12
+
     ' Changing states
     gate = 13
     escape = 14
 
-    Range("AA32").Value = escape
-    Range("AA18").Value = trap
-    Range("AA20").Value = battery
-    Range("AA20").Font.ColorIndex = 6
-    Range("AA26:AC26").Value = gate
-    Range("Z26:Z32").Value = wall
-    Range("AD26:AD32").Value = wall
-    Range("AB28").Value = trap
-    Range("J8").Value = rock
-    Range("R15").Value = puddle
-    Range("K18").Value = mushroom
-    Range("W11").Value = shrub
-    Range("AE24").Value = flower
-    Range("AG8").Value = shop
-    Range("N27").Value = firefly
-    Range("I10").Value = usb
-    Range("I10").Font.Color = vbGreen
-    Range("A1:AR4").Value = wall
-    Range("AO5:AR36").Value = wall
-    Range("A33:AN36").Value = wall
-    Range("A5:D32").Value = wall
-    Range("A1:AR4").Interior.Color = vbBlack
-    Range("AO5:AR36").Interior.Color = vbBlack
-    Range("A33:AN36").Interior.Color = vbBlack
-    Range("A5:D32").Interior.Color = vbBlack
-    Range("AW3").Font.Size = 26
-    Range("BB15").Font.Size = 15
+    'sets level back to 0
+    level = 0
 
+    'loads in the level 1 values
+    LoadLevel()
 
+    'Player Variables
     ReDim r(1)
     ReDim c(1)
     r(0) = 10
     c(0) = 10
     rinc = 0 : cinc = 0
     vis = 0
-    steps = 0
     lightData = 0
+
+    'Envir searching variables
     isPickedUp = False
     rockSearch = False
     flowerSearch = False
@@ -99,36 +88,41 @@ Sub StartGame()
     puddleSearch = False
     mushroomSearch = False
     isHalfway = False
+
+    'bind keys and render player
     bindKeys
     ActionKey()
     ShowVis()
     ShowPlayer()
-    Hit()
-    interact()
     AddUI()
 
 End Sub
+'----------------------------ACTION KEY BIND ----------------------------------------------------
 Sub ActionKey()
     Application.OnKey "{RETURN}", "interact"
 End Sub
+'----------------------------SHOW PLAYER AND VISION-------------------------------------------------
 Sub ShowPlayer()
     Cells(r(0), c(0)).Interior.Color = vbRed
 End Sub
 Sub ShowVis()
     Range(Cells(r(0) - vis, c(0) - vis), Cells(r(0) + vis, c(0) + vis)).Interior.ColorIndex = 15
 End Sub
-
+'--------------------------UPDATE AND MOVE PLAYER----------------------------------------------------
 Sub MovePlayer()
+    ' if the player moves then run this
     If rinc <> 0 Or cinc <> 0 Then
+        'sets past position to vision color
         Cells(r(0), c(0)).Interior.ColorIndex = 15
+        'if the cell you are moving to is black or the vision color then run
         If (Cells(r(0) + rinc, c(0) + cinc).Interior.Color = vbBlack Or Cells(r(0) + rinc, c(0) + cinc).Interior.ColorIndex = 15) Then
+            'collision  condition
             If (Cells(r(0) + rinc, c(0) + cinc).Value >= 9 Or Cells(r(0) + rinc, c(0) + cinc).Value = 0) Then
+                ' permission condition
                 If (Cells(r(0) + rinc, c(0) + cinc).Value <> gate Or isPickedUp = True) Then
                     r(0) = r(0) + rinc
                     c(0) = c(0) + cinc
-                    steps = steps + 1
-                    Range("B30").Value = steps
-
+                    'setting past vision range to black
                     If (rinc = 0 And cinc = 1) Then
                         Range(Cells(r(0) - vis + -rinc, c(0) - vis + -cinc), Cells(r(0) + vis, c(0) - (vis * -cinc))).Interior.Color = vbBlack
                     End If
@@ -145,12 +139,14 @@ Sub MovePlayer()
             End If
         End If
 
+        'updating functions
         Hit()
         Recharge()
         ShowVis()
         ShowPlayer()
         UpdateUI()
 
+        'TODO: FUNCTION FOR THIS checks light data and informs player maybe change to UI boolean check to permission levels
         If lightData = 30 And isHalfway = False Then
             MsgBox "The USB device in your possesion whirls. A bar on the face of the device is half way full"
         isHalfway = True
@@ -162,7 +158,9 @@ Sub MovePlayer()
 
     End If
 End Sub
+'------------------------------INTERACTION CHECKS----------------------------------------------
 Sub interact()
+    'TODO Make function for each interaction check to make it look prettier
 
     If Cells(r(0), c(0) - 1).Value = rock Or Cells(r(0), c(0) + 1).Value = rock Or Cells(r(0) + 1, c(0)).Value = rock Or Cells(r(0) - 1, c(0)).Value = rock Then
         If rockSearch = True Then
@@ -249,6 +247,8 @@ Sub interact()
 
     End If
 End Sub
+'--------------------------------PLAYER ON VALUE IN CELL ----------------------------------------
+'TODO combine RECHARGE and HIT function
 Sub Hit()
     If Cells(r(0), c(0)).Value = trap And vis > 0 Then
         vis = vis - 1
@@ -271,14 +271,15 @@ Sub Recharge()
         Cells(r(0), c(0)).Value = Null
         MsgBox "USB FOUND: Vision capabilites unlocked"
 End If
-End Sub
 
+End Sub
+'------------------------------------------UI ADDING AND UPDATING---------------------------------
 Sub AddUI()
     ' Health bar
     Range("AT4", "bd34").Interior.Color = RGB(239, 222, 205)
     Range("AY4").Value = "Health:"
     ' Batteries
-    Range("AY6").Value = "Battery Strength:"
+    Range("AY6").Value = "Light Strength:"
     Range("AY11").Interior.Color = vbRed
     Range("AZ11").Value = 1
     Range("AZ10").Value = 2
@@ -311,4 +312,37 @@ Sub UpdateUI()
         Range("AY11", "AY10").Interior.Color = vbGreen
         Range("AY9").Interior.Color = vbGreen
     End If
+End Sub
+'----------------------------------------------LOAIDNG LEVELS-----------------------------------------
+Sub LoadLevel()
+    If level = 0 Then
+        Range("AA32").Value = escape
+        Range("AA18").Value = trap
+        Range("AA20").Value = battery
+        Range("AA20").Font.ColorIndex = 6
+        Range("AA26:AC26").Value = gate
+        Range("Z26:Z32").Value = wall
+        Range("AD26:AD32").Value = wall
+        Range("AB28").Value = trap
+        Range("J8").Value = rock
+        Range("R15").Value = puddle
+        Range("K18").Value = mushroom
+        Range("W11").Value = shrub
+        Range("AE24").Value = flower
+        Range("AG8").Value = shop
+        Range("N27").Value = firefly
+        Range("I10").Value = usb
+        Range("I10").Font.Color = vbGreen
+        Range("A1:AR4").Value = wall
+        Range("AO5:AR36").Value = wall
+        Range("A33:AN36").Value = wall
+        Range("A5:D32").Value = wall
+        Range("A1:AR4").Interior.Color = vbBlack
+        Range("AO5:AR36").Interior.Color = vbBlack
+        Range("A33:AN36").Interior.Color = vbBlack
+        Range("A5:D32").Interior.Color = vbBlack
+        Range("AW3").Font.Size = 26
+        Range("BB15").Font.Size = 15
+    End If
+
 End Sub

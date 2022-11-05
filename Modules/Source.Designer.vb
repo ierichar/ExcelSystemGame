@@ -117,7 +117,6 @@ Sub StartGame()
     Hit()
     interact()
     ShowUI()
-    InsertImage
 
 End Sub
 

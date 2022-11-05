@@ -1,5 +1,6 @@
 ﻿Public rinc As Integer, cinc As Integer
 Public vis As Integer
+Public health As Integer
 Public steps As Integer
 
 Public isPickedUp As Boolean
@@ -82,6 +83,8 @@ Sub StartGame()
     Range("AW11").Font.Size = 26
     Range("BB11").Font.Size = 15
     Range("AW11").Value = "Light Data "
+    Range("AW10").Font.Size = 26
+    Range("AW10").Value = "Health"
 
     'Player Values
     ReDim r(1)
@@ -90,6 +93,7 @@ Sub StartGame()
     rinc = 0 : cinc = 0
     vis = 0
     steps = 0
+    health = 3
     lightData = 0
     isPickedUp = False
     rockSearch = False
@@ -114,6 +118,7 @@ Sub StartGame()
     ShowEnemy()
     Hit()
     interact()
+    ShowUI()
 
 End Sub
 '=======================ActionKey===========================================
@@ -198,33 +203,36 @@ Sub MoveEnemy()
     Debug.Print("Moving enemy...")
     If (RevealEnemy() = True) Then
         Dim xDiff As Integer, yDiff As Integer
-        Dim newPosX As Integer, newPosY As Integer
-        newPosX = 0
-        newPosY = 0
 
         yDiff = r(0) - le_r(0)
         xDiff = c(0) - le_c(0)
         Debug.Print("xDiff val: " & xDiff)
         Debug.Print("yDiff val: " & yDiff)
 
-        If (yDiff > 0 And xDiff > 0) Then
+        If (yDiff >= 0 And xDiff >= 0) Then
             If (yDiff > xDiff) Then
                 le_r(0) = le_r(0) + 1
             Else : le_c(0) = le_c(0) + 1
             End If
-
-        ElseIf (yDiff < 0 And xDiff < 0) Then
+        ElseIf (yDiff >= 0 And xDiff <= 0) Then
+            If (Abs(yDiff) > Abs(xDiff)) Then
+                le_r(0) = le_r(0) + 1
+            Else : le_c(0) = le_c(0) - 1
+            End If
+        ElseIf (yDiff <= 0 And xDiff >= 0) Then
+            If (Abs(yDiff) > Abs(xDiff)) Then
+                le_r(0) = le_r(0) - 1
+            Else : le_c(0) = le_c(0) + 1
+            End If
+        ElseIf (yDiff <= 0 And xDiff <= 0) Then
             If (yDiff < xDiff) Then
                 le_r(0) = le_r(0) - 1
             Else : le_c(0) = le_c(0) - 1
             End If
         End If
-        Debug.Print("newPosX val: " & xDiff)
-        Debug.Print("newPosY val: " & yDiff)
-        'If (CheckCollision(newPosX, newPosY) = True) Then
-        'le_r(0) = newPosX
-        'le_c(0) = newPosY
-        'End If
+        If (CheckCollision(le_r(0), le_c(0)) = True) Then
+            health = 3
+        End If
     End If
 
 End Sub
@@ -232,7 +240,7 @@ End Sub
 '=====================CheckCollision===================
 Function CheckCollision(x1 As Integer, y1 As Integer) As Boolean
     'check cell of direction vector
-    If (Cells(x1, y1).Interior.Color = vbBlack Or Cells(x1, y1).Interior.ColorIndex = 15) Then
+    If (Cells(x1, y1) = Cells(c(0), r(0))) Then
         CheckCollision = True
     Else : CheckCollision = False
     End If
@@ -353,4 +361,9 @@ Sub Recharge()
         Cells(r(0), c(0)).Value = Null
         MsgBox "USB FOUND: Vision capabilites unlocked"
 End If
+End Sub
+
+'=============================ShowUI================================
+Sub ShowUI()
+    Range("BB10").Value = health
 End Sub

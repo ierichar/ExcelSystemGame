@@ -112,20 +112,15 @@ Sub StartGame()
     le_isRevealed = False
 
     bindKeys
-    ActionKey()
     ShowVis()
     ShowPlayer()
-    ShowEnemy()
     Hit()
     interact()
     ShowUI()
+    InsertImage
 
 End Sub
-'=======================ActionKey===========================================
-' NOTE: Probably move to binds if possible
-Sub ActionKey()
-    Application.OnKey "{RETURN}", "interact"
-End Sub
+
 '=======================ShowPlayer===========================================
 Sub ShowPlayer()
     Cells(r(0), c(0)).Interior.Color = vbRed
@@ -367,3 +362,4 @@ End Sub
 Sub ShowUI()
     Range("BB10").Value = health
 End Sub
+

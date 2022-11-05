@@ -3,6 +3,7 @@
     Application.OnKey "{RIGHT}", "moveRight"
     Application.OnKey "{UP}", "moveUp"
     Application.OnKey "{DOWN}", "moveDown"
+    Application.OnKey "{RETURN}", "interact"
 End Sub
 
 Sub moveLeft()
@@ -34,4 +35,6 @@ Sub freeKeys()
     Application.OnKey "RIGHT"
     Application.OnKey "UP"
     Application.OnKey "DOWN"
+    Application.OnKey "RETURN"
 End Sub
+

@@ -2,6 +2,7 @@
 
 Public rinc As Integer, cinc As Integer
 Public vis As Integer
+Public health As Integer
 Public steps As Integer
 Public level As Integer
 
@@ -32,9 +33,10 @@ Public isHalfway As Boolean
 
 Public lightData As Integer
 
-
 Dim r() As Integer, c() As Integer
+Dim le_r() As Integer, le_c() As Integer
 Sub StartGame()
+
     'Clear All Values
     Cells.Clear
 
@@ -64,11 +66,43 @@ Sub StartGame()
     gate = 13
     escape = 14
 
+    Range("AA32").Value = escape
+    Range("AA18").Value = trap
+    Range("AA20").Value = battery
+    Range("AA20").Font.ColorIndex = 6
+    Range("AA26:AC26").Value = gate
+    Range("Z26:Z32").Value = wall
+    Range("AD26:AD32").Value = wall
+    Range("AB28").Value = trap
+    Range("J8").Value = rock
+    Range("R15").Value = puddle
+    Range("K18").Value = mushroom
+    Range("W11").Value = shrub
+    Range("AE24").Value = flower
+    Range("AG8").Value = shop
+    Range("N27").Value = firefly
+    Range("I10").Value = usb
+    Range("I10").Font.Color = vbGreen
+    Range("A1:AR4").Value = wall
+    Range("AO5:AR36").Value = wall
+    Range("A33:AN36").Value = wall
+    Range("A5:D32").Value = wall
+    Range("A1:AR4").Interior.Color = vbBlack
+    Range("AO5:AR36").Interior.Color = vbBlack
+    Range("A33:AN36").Interior.Color = vbBlack
+    Range("A5:D32").Interior.Color = vbBlack
+    Range("AW3").Font.Size = 26
+    Range("AW11").Font.Size = 26
+    Range("BB11").Font.Size = 15
+    Range("AW11").Value = "Light Data "
+    Range("AW10").Font.Size = 26
+    Range("AW10").Value = "Health"
+
     'sets level back to 0
     level = 0
 
     'loads in the level 1 values
-    LoadLevel()
+    LoadLevel
 
     'Player Variables
     ReDim r(1)
@@ -89,25 +123,35 @@ Sub StartGame()
     mushroomSearch = False
     isHalfway = False
 
+    'Enemy Values
+    ReDim le_r(1)
+    ReDim le_c(1)
+    le_r(0) = 16 : le_c(0) = 16
+    le_rinc = 0 : le_cinc = 0
+    le_isRevealed = False
+
     'bind keys and render player
     bindKeys
-    ActionKey()
-    ShowVis()
-    ShowPlayer()
-    AddUI()
+    ShowVis
+    ShowPlayer
+    AddUI
 
 End Sub
-'----------------------------ACTION KEY BIND ----------------------------------------------------
-Sub ActionKey()
-    Application.OnKey "{RETURN}", "interact"
-End Sub
+
 '----------------------------SHOW PLAYER AND VISION-------------------------------------------------
 Sub ShowPlayer()
     Cells(r(0), c(0)).Interior.Color = vbRed
 End Sub
+Sub ShowEnemy()
+    Cells(le_r(0), le_c(0)).Interior.Color = vbGreen
+End Sub
+
+'=================================ShowVis=====================================
 Sub ShowVis()
     Range(Cells(r(0) - vis, c(0) - vis), Cells(r(0) + vis, c(0) + vis)).Interior.ColorIndex = 15
+    ShowEnemy
 End Sub
+
 '--------------------------UPDATE AND MOVE PLAYER----------------------------------------------------
 Sub MovePlayer()
     ' if the player moves then run this
@@ -140,12 +184,12 @@ Sub MovePlayer()
         End If
 
         'updating functions
-        Hit()
-        Recharge()
-        ShowVis()
-        ShowPlayer()
-        UpdateUI()
-
+        Hit
+        Recharge
+        ShowVis
+        ShowPlayer
+        UpdateUI
+        
         'TODO: FUNCTION FOR THIS checks light data and informs player maybe change to UI boolean check to permission levels
         If lightData = 30 And isHalfway = False Then
             MsgBox "The USB device in your possesion whirls. A bar on the face of the device is half way full"
@@ -158,6 +202,68 @@ Sub MovePlayer()
 
     End If
 End Sub
+
+'==================RevealEnemy===============
+'Pre: r(0), c(0), le_r(0), le_r(0), vis
+Function RevealEnemy()
+    Debug.Print("Checking reveal...")
+    If Abs(r(0) - le_r(0)) <= vis And Abs(c(0) - le_r(0)) <= vis Then
+        le_isRevealed = True
+        Debug.Print("enemy found player!")
+        RevealEnemy = True
+    Else : le_isRevealed = False
+    End If
+End Function
+
+'==================MoveEnemy=================
+'Pre: r(0), c(0), le_r(0), le_r(0)
+Sub MoveEnemy()
+    Debug.Print("Moving enemy...")
+    If (RevealEnemy() = True) Then
+        Dim xDiff As Integer, yDiff As Integer
+
+        yDiff = r(0) - le_r(0)
+        xDiff = c(0) - le_c(0)
+        Debug.Print("xDiff val: " & xDiff)
+        Debug.Print("yDiff val: " & yDiff)
+
+        If (yDiff >= 0 And xDiff >= 0) Then
+            If (yDiff > xDiff) Then
+                le_r(0) = le_r(0) + 1
+            Else : le_c(0) = le_c(0) + 1
+            End If
+        ElseIf (yDiff >= 0 And xDiff <= 0) Then
+            If (Abs(yDiff) > Abs(xDiff)) Then
+                le_r(0) = le_r(0) + 1
+            Else : le_c(0) = le_c(0) - 1
+            End If
+        ElseIf (yDiff <= 0 And xDiff >= 0) Then
+            If (Abs(yDiff) > Abs(xDiff)) Then
+                le_r(0) = le_r(0) - 1
+            Else : le_c(0) = le_c(0) + 1
+            End If
+        ElseIf (yDiff <= 0 And xDiff <= 0) Then
+            If (yDiff < xDiff) Then
+                le_r(0) = le_r(0) - 1
+            Else : le_c(0) = le_c(0) - 1
+            End If
+        End If
+        If (CheckCollision(le_r(0), le_c(0)) = True) Then
+            health = 3
+        End If
+    End If
+
+End Sub
+
+'=====================CheckCollision===================
+Function CheckCollision(x1 As Integer, y1 As Integer) As Boolean
+    'check cell of direction vector
+    If (Cells(x1, y1) = Cells(c(0), r(0))) Then
+        CheckCollision = True
+    Else : CheckCollision = False
+    End If
+End Function
+
 '------------------------------INTERACTION CHECKS----------------------------------------------
 Sub interact()
     'TODO Make function for each interaction check to make it look prettier
@@ -247,6 +353,7 @@ Sub interact()
 
     End If
 End Sub
+
 '--------------------------------PLAYER ON VALUE IN CELL ----------------------------------------
 'TODO combine RECHARGE and HIT function
 Sub Hit()
@@ -260,6 +367,8 @@ Sub Hit()
         Range("AW3").Value = "This seems like the way out! Next Level Reached"
     End If
 End Sub
+
+'===========================Recharge==============================
 Sub Recharge()
     If Cells(r(0), c(0)).Value = battery And vis <= 3 Then
         vis = vis + 1
@@ -346,3 +455,4 @@ Sub LoadLevel()
     End If
 
 End Sub
+

@@ -5,7 +5,6 @@ Public rinc As Integer, cinc As Integer
 Public vis As Integer
 Public health As Integer
 
-Public isPickedUp As Boolean
 
 Public trap As Integer
 Public key As Integer
@@ -30,8 +29,17 @@ Public mushroomSearch As Boolean
 Public puddleSearch As Boolean
 Public isHalfway As Boolean
 
+Public rockRefresh As Integer
+Public shrubRefresh As Integer
+Public mushroomRefresh As Integer
+Public flowerRefresh As Integer
+Public puddleRefresh As Integer
+
+
 Public lightData As Integer
 Public spaceDiscovered As Integer
+Public authorityLevel As Integer
+Public level As Integer
 
 Dim r() As Integer, c() As Integer
 Dim le_r() As Integer, le_c() As Integer
@@ -62,6 +70,7 @@ Sub StartGame()
 
 
     'loads in the level 1 values
+    level = 0
     LoadLevel(0)
 
     'Player Variables
@@ -71,6 +80,7 @@ Sub StartGame()
     c(0) = 10
     rinc = 0 : cinc = 0
     vis = 0
+    authorityLevel = 0
 
     'Enemy Values
     ReDim le_r(1)
@@ -117,7 +127,7 @@ Sub MovePlayer()
             'collision  condition
             If (Cells(r(0) + rinc, c(0) + cinc).Value >= 9 Or Cells(r(0) + rinc, c(0) + cinc).Value = 0) Then
                 ' permission condition
-                If (Cells(r(0) + rinc, c(0) + cinc).Value <> gate Or isPickedUp = True) Then
+                If (Cells(r(0) + rinc, c(0) + cinc).Value <> gate Or authorityLevel = 1) Then
                     r(0) = r(0) + rinc
                     c(0) = c(0) + cinc
                     'setting past vision range to black
@@ -144,7 +154,8 @@ Sub MovePlayer()
         ShowEnemy()
         MoveEnemy()
         UpdateUI()
-        AuthorityLevelCheck()
+        AuthorityLevelCheck(level)
+        SearchRefresh()
 
 
     End If
@@ -225,8 +236,9 @@ Sub interact()
             Range("BB15").Value = lightData
             rockSearch = True
         End If
-
     End If
+
+
     If Cells(r(0), c(0) - 1).Value = shrub Or Cells(r(0), c(0) + 1).Value = shrub Or Cells(r(0) + 1, c(0)).Value = shrub Or Cells(r(0) - 1, c(0)).Value = shrub Then
         If shrubSearch = True Then
             Range("AW3").Value = "A shrub. The berries look dull"
@@ -274,21 +286,57 @@ Sub interact()
             Range("AW3").Value = "You find a mushroom. The spots on the cap seem to be glowing and give off energy"
             lightData = lightData + 10
             Range("BB15").Value = lightData
-            mushroomSearch = True
+
         End If
     End If
     If Cells(r(0), c(0) - 1).Value = gate Or Cells(r(0), c(0) + 1).Value = gate Or Cells(r(0) + 1, c(0)).Value = gate Or Cells(r(0) - 1, c(0)).Value = gate Then
-        If isPickedUp = False Then
+        If authorityLevel = 0 Then
             Range("AW3").Value = "You find what seems like a gate. It has the same glow as the things around you but does not give it off."
         End If
-        If isPickedUp = True Then
+        If authorityLevel = 1 Then
             Range("AW3").Value = "The gate has lost its glow and is swung open"
         End If
     End If
     If Cells(r(0), c(0) - 1).Value = wall Or Cells(r(0), c(0) + 1).Value = wall Or Cells(r(0) + 1, c(0)).Value = wall Or Cells(r(0) - 1, c(0)).Value = wall Then
         Range("AW3").Value = "A hard sturdy wall. Looks impenetrable"
-
     End If
+End Sub
+Sub SearchRefresh()
+    If (rockSearch = False) Then
+        rockRefresh = spaceDiscovered
+    End If
+    If (rockSearch = True And spaceDiscovered = rockRefresh + 20) Then
+        rockSearch = False
+    End If
+
+    If (shrubSearch = False) Then
+        shrubRefresh = spaceDiscovered
+    End If
+    If (shrubSearch = True And spaceDiscovered = shrubRefresh + 20) Then
+        shrubSearch = False
+    End If
+
+    If (flowerSearch = False) Then
+        flowerRefresh = spaceDiscovered
+    End If
+    If (flowerSearch = True And spaceDiscovered = flowerRefresh + 20) Then
+        flowerSearch = False
+    End If
+
+    If (mushroomSearch = False) Then
+        mushroomRefresh = spaceDiscovered
+    End If
+    If (mushroomSearch = True And spaceDiscovered = mushroomRefresh + 20) Then
+        mushroomSearch = False
+    End If
+
+    If (puddleSearch = False) Then
+        puddleRefresh = spaceDiscovered
+    End If
+    If (puddleSearch = True And spaceDiscovered = puddleRefresh + 20) Then
+        puddleSearch = False
+    End If
+
 End Sub
 
 '--------------------------------PLAYER COLLISION IN CELL ----------------------------------------
@@ -302,7 +350,8 @@ Sub Collide()
     If Cells(r(0), c(0)).Value = escape Then
         If level = 0 Then
             Range("AW3").Value = "This seems like the way out! Next Level Reached"
-            LoadLevel(1)
+            level = level + 1
+            LoadLevel(level)
         End If
     End If
 
@@ -310,24 +359,28 @@ Sub Collide()
         vis = vis + 1
         Cells(r(0), c(0)).Value = Null
         Range("AW3").Value = "YOU CAPTURED A FIREFLY: USB recharged!"
+        Cells(r(0), c(0)).Font.Color = vbBlack
     End If
     If Cells(r(0), c(0)).Value = usb And vis = 0 Then
         vis = vis + 2
         Cells(r(0), c(0)).Value = Null
         MsgBox "USB FOUND: Vision capabilites unlocked"
+        Cells(r(0), c(0)).Font.Color = vbBlack
     End If
 End Sub
 
-Sub AuthorityLevelCheck()
-    If lightData = 30 And isHalfway = False Then
-        MsgBox "The USB device in your possesion whirls. A bar on the face of the device is half way full"
-        isHalfway = True
+Function AuthorityLevelCheck(level As Integer)
+    If level = 0 Then
+        If lightData >= 20 And spaceDiscovered >= 75 And isHalfway = False Then
+            MsgBox "The USB device in your possesion whirls. A bar on the face of the device is half way full"
+            isHalfway = True
+        End If
+        If lightData >= 50 And spaceDiscovered >= 125 And authorityLevel = 0 Then
+            MsgBox "The USB device in your possesion whirls again. It flashes with the words AUTHORITY LEVEL INCREASED"
+            authorityLevel = 1
+        End If
     End If
-    If lightData = 50 And isPickedUp = False Then
-        MsgBox "The USB device in your possesion whirls again. It flashes with the words PERMISSION INCREASED"
-        isPickedUp = True
-    End If
-End Sub
+End Function
 
 '------------------------------------------UI ADDING AND UPDATING---------------------------------
 Sub AddUI()
@@ -386,14 +439,19 @@ Function LoadLevel(level As Integer)
     Range("A5:D32").Interior.Color = vbBlack
 
     'Envir searching variables
-    isPickedUp = False
-    rockSearch = False
-    flowerSearch = False
-    shrubSearch = False
-    fireflySearch = False
-    puddleSearch = False
-    mushroomSearch = False
     isHalfway = False
+    rockSearch = False
+    shrubSearch = False
+    flowerSearch = False
+    mushroomSearch = False
+    puddleSearch = False
+
+    rockRefresh = 0
+    shrubRefresh = 0
+    flowerRefresh = 0
+    mushroomRefresh = 0
+    puddleRefresh = 0
+
 
     'Level Progression
     lightData = 0
@@ -404,7 +462,7 @@ Function LoadLevel(level As Integer)
 
 
         Range("AA32").Value = escape
-        Range("AA18").Value = trap
+        Range("T5:T32").Value = trap
         Range("AA20").Value = firefly
         Range("AA20").Font.ColorIndex = 6
         Range("AA26:AC26").Value = gate
@@ -412,10 +470,10 @@ Function LoadLevel(level As Integer)
         Range("AD26:AD32").Value = wall
         Range("AB28").Value = trap
         Range("J8").Value = rock
-        Range("R15").Value = puddle
-        Range("K18").Value = mushroom
+        Range("R15").Value = shrub
+        Range("K18").Value = rock
         Range("W11").Value = shrub
-        Range("AE24").Value = flower
+        Range("AE24").Value = rock
         Range("AG8").Value = shop
         Range("N27").Value = firefly
         Range("N27").Font.ColorIndex = 6

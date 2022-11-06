@@ -1,10 +1,9 @@
-﻿Imports System.Net.Mime.MediaTypeNames
+﻿
+Imports System.Diagnostics
 
 Public rinc As Integer, cinc As Integer
 Public vis As Integer
 Public health As Integer
-Public steps As Integer
-Public level As Integer
 
 Public isPickedUp As Boolean
 
@@ -22,27 +21,21 @@ Public puddle As Integer
 Public escape As Integer
 Public gate As Integer
 Public usb As Integer
+Public footprints As Integer
 
 Public rockSearch As Boolean
 Public shrubSearch As Boolean
 Public flowerSearch As Boolean
 Public mushroomSearch As Boolean
-Public fireflySearch As Boolean
 Public puddleSearch As Boolean
 Public isHalfway As Boolean
 
 Public lightData As Integer
+Public spaceDiscovered As Integer
 
 Dim r() As Integer, c() As Integer
 Dim le_r() As Integer, le_c() As Integer
 Sub StartGame()
-
-    'Clear All Values
-    Cells.Clear
-
-    'Set Bound of Level
-    Range("E5:AN32").Interior.Color = vbBlack
-    Range("E5:AN32").Font.Size = 18
 
     'Sets Values for enviornment
 
@@ -54,11 +47,10 @@ Sub StartGame()
     flower = 5
     mushroom = 6
     puddle = 7
-    firefly = 8
 
     ' Collidable
     trap = 9
-    battery = 10
+    firefly = 10
     key = 11
     usb = 12
 
@@ -66,43 +58,11 @@ Sub StartGame()
     gate = 13
     escape = 14
 
-    Range("AA32").Value = escape
-    Range("AA18").Value = trap
-    Range("AA20").Value = battery
-    Range("AA20").Font.ColorIndex = 6
-    Range("AA26:AC26").Value = gate
-    Range("Z26:Z32").Value = wall
-    Range("AD26:AD32").Value = wall
-    Range("AB28").Value = trap
-    Range("J8").Value = rock
-    Range("R15").Value = puddle
-    Range("K18").Value = mushroom
-    Range("W11").Value = shrub
-    Range("AE24").Value = flower
-    Range("AG8").Value = shop
-    Range("N27").Value = firefly
-    Range("I10").Value = usb
-    Range("I10").Font.Color = vbGreen
-    Range("A1:AR4").Value = wall
-    Range("AO5:AR36").Value = wall
-    Range("A33:AN36").Value = wall
-    Range("A5:D32").Value = wall
-    Range("A1:AR4").Interior.Color = vbBlack
-    Range("AO5:AR36").Interior.Color = vbBlack
-    Range("A33:AN36").Interior.Color = vbBlack
-    Range("A5:D32").Interior.Color = vbBlack
-    Range("AW3").Font.Size = 26
-    Range("AW11").Font.Size = 26
-    Range("BB11").Font.Size = 15
-    Range("AW11").Value = "Light Data "
-    Range("AW10").Font.Size = 26
-    Range("AW10").Value = "Health"
+    footprints = 15
 
-    'sets level back to 0
-    level = 0
 
     'loads in the level 1 values
-    LoadLevel
+    LoadLevel(0)
 
     'Player Variables
     ReDim r(1)
@@ -111,17 +71,6 @@ Sub StartGame()
     c(0) = 10
     rinc = 0 : cinc = 0
     vis = 0
-    lightData = 0
-
-    'Envir searching variables
-    isPickedUp = False
-    rockSearch = False
-    flowerSearch = False
-    shrubSearch = False
-    fireflySearch = False
-    puddleSearch = False
-    mushroomSearch = False
-    isHalfway = False
 
     'Enemy Values
     ReDim le_r(1)
@@ -132,9 +81,9 @@ Sub StartGame()
 
     'bind keys and render player
     bindKeys
-    ShowVis
-    ShowPlayer
-    AddUI
+    ShowVis()
+    ShowPlayer()
+    AddUI()
 
 End Sub
 
@@ -149,7 +98,7 @@ End Sub
 '=================================ShowVis=====================================
 Sub ShowVis()
     Range(Cells(r(0) - vis, c(0) - vis), Cells(r(0) + vis, c(0) + vis)).Interior.ColorIndex = 15
-    ShowEnemy
+    ShowEnemy()
 End Sub
 
 '--------------------------UPDATE AND MOVE PLAYER----------------------------------------------------
@@ -158,6 +107,11 @@ Sub MovePlayer()
     If rinc <> 0 Or cinc <> 0 Then
         'sets past position to vision color
         Cells(r(0), c(0)).Interior.ColorIndex = 15
+        If Cells(r(0), c(0)).Value <> footprints Then
+            Cells(r(0), c(0)).Value = footprints
+            spaceDiscovered = spaceDiscovered + 1
+            Range("C37").Value = spaceDiscovered
+        End If
         'if the cell you are moving to is black or the vision color then run
         If (Cells(r(0) + rinc, c(0) + cinc).Interior.Color = vbBlack Or Cells(r(0) + rinc, c(0) + cinc).Interior.ColorIndex = 15) Then
             'collision  condition
@@ -184,21 +138,14 @@ Sub MovePlayer()
         End If
 
         'updating functions
-        Hit
-        Recharge
-        ShowVis
-        ShowPlayer
-        UpdateUI
-        
-        'TODO: FUNCTION FOR THIS checks light data and informs player maybe change to UI boolean check to permission levels
-        If lightData = 30 And isHalfway = False Then
-            MsgBox "The USB device in your possesion whirls. A bar on the face of the device is half way full"
-        isHalfway = True
-        End If
-        If lightData = 50 And isPickedUp = False Then
-            MsgBox "The USB device in your possesion whirls again. It flashes with the words PERMISSION INCREASED"
-        isPickedUp = True
-        End If
+        Collide()
+        ShowVis()
+        ShowPlayer()
+        ShowEnemy()
+        MoveEnemy()
+        UpdateUI()
+        AuthorityLevelCheck()
+
 
     End If
 End Sub
@@ -306,17 +253,7 @@ Sub interact()
     If Cells(r(0), c(0) - 1).Value = shop Or Cells(r(0), c(0) + 1).Value = shop Or Cells(r(0) + 1, c(0)).Value = shop Or Cells(r(0) - 1, c(0)).Value = shop Then
         Range("AW3").Value = "You find a shop but there is a painted sign that says OuT fOr LUnCh"
     End If
-    If Cells(r(0), c(0) - 1).Value = firefly Or Cells(r(0), c(0) + 1).Value = firefly Or Cells(r(0) + 1, c(0)).Value = firefly Or Cells(r(0) - 1, c(0)).Value = firefly Then
-        If fireflySearch = True Then
-            Range("AW3").Value = "The same fireflies as before but more dull"
-        End If
-        If fireflySearch = False Then
-            Range("AW3").Value = "You find a couple of fireflies that circle around you emiting some sort of energy"
-            lightData = lightData + 10
-            Range("BB15").Value = lightData
-            fireflySearch = True
-        End If
-    End If
+
     If Cells(r(0), c(0) - 1).Value = puddle Or Cells(r(0), c(0) + 1).Value = puddle Or Cells(r(0) + 1, c(0)).Value = puddle Or Cells(r(0) - 1, c(0)).Value = puddle Then
         If puddleSearch = True Then
             Range("AW3").Value = "The same puddle as before but only your reflection stares back at you."
@@ -324,7 +261,7 @@ Sub interact()
         If puddleSearch = False Then
             Range("AW3").Value = "You find a puddle. Instead of your reflection it gives off an aura of energy"
             lightData = lightData + 10
-            Range("BB11").Value = lightData
+            Range("BB15").Value = lightData
             puddleSearch = True
         End If
 
@@ -354,9 +291,8 @@ Sub interact()
     End If
 End Sub
 
-'--------------------------------PLAYER ON VALUE IN CELL ----------------------------------------
-'TODO combine RECHARGE and HIT function
-Sub Hit()
+'--------------------------------PLAYER COLLISION IN CELL ----------------------------------------
+Sub Collide()
     If Cells(r(0), c(0)).Value = trap And vis > 0 Then
         vis = vis - 1
         Cells(r(0), c(0)).Value = Null
@@ -364,24 +300,35 @@ Sub Hit()
     End If
 
     If Cells(r(0), c(0)).Value = escape Then
-        Range("AW3").Value = "This seems like the way out! Next Level Reached"
+        If level = 0 Then
+            Range("AW3").Value = "This seems like the way out! Next Level Reached"
+            LoadLevel(1)
+        End If
     End If
-End Sub
 
-'===========================Recharge==============================
-Sub Recharge()
-    If Cells(r(0), c(0)).Value = battery And vis <= 3 Then
+    If Cells(r(0), c(0)).Value = firefly And vis < 3 Then
         vis = vis + 1
         Cells(r(0), c(0)).Value = Null
-        Range("AW3").Value = "BATTERY RECOVERED: 1 vision level restored"
+        Range("AW3").Value = "YOU CAPTURED A FIREFLY: USB recharged!"
     End If
-    If Cells(r(0), c(0)).Value = 12 And vis = 0 Then
+    If Cells(r(0), c(0)).Value = usb And vis = 0 Then
         vis = vis + 2
         Cells(r(0), c(0)).Value = Null
         MsgBox "USB FOUND: Vision capabilites unlocked"
-End If
-
+    End If
 End Sub
+
+Sub AuthorityLevelCheck()
+    If lightData = 30 And isHalfway = False Then
+        MsgBox "The USB device in your possesion whirls. A bar on the face of the device is half way full"
+        isHalfway = True
+    End If
+    If lightData = 50 And isPickedUp = False Then
+        MsgBox "The USB device in your possesion whirls again. It flashes with the words PERMISSION INCREASED"
+        isPickedUp = True
+    End If
+End Sub
+
 '------------------------------------------UI ADDING AND UPDATING---------------------------------
 Sub AddUI()
     ' Health bar
@@ -389,7 +336,6 @@ Sub AddUI()
     Range("AY4").Value = "Health:"
     ' Batteries
     Range("AY6").Value = "Light Strength:"
-    Range("AY11").Interior.Color = vbRed
     Range("AZ11").Value = 1
     Range("AZ10").Value = 2
     Range("AZ9").Value = 3
@@ -423,11 +369,43 @@ Sub UpdateUI()
     End If
 End Sub
 '----------------------------------------------LOAIDNG LEVELS-----------------------------------------
-Sub LoadLevel()
+Function LoadLevel(level As Integer)
+    'Clear All Values
+    Cells.Clear
+
+    'Set Bound of Level
+    Range("E5:AN32").Interior.Color = vbBlack
+    Range("E5:AN32").Font.Size = 18
+    Range("A1:AR4").Value = wall
+    Range("AO5:AR36").Value = wall
+    Range("A33:AN36").Value = wall
+    Range("A5:D32").Value = wall
+    Range("A1:AR4").Interior.Color = vbBlack
+    Range("AO5:AR36").Interior.Color = vbBlack
+    Range("A33:AN36").Interior.Color = vbBlack
+    Range("A5:D32").Interior.Color = vbBlack
+
+    'Envir searching variables
+    isPickedUp = False
+    rockSearch = False
+    flowerSearch = False
+    shrubSearch = False
+    fireflySearch = False
+    puddleSearch = False
+    mushroomSearch = False
+    isHalfway = False
+
+    'Level Progression
+    lightData = 0
+    spaceDiscovered = 0
+
+
     If level = 0 Then
+
+
         Range("AA32").Value = escape
         Range("AA18").Value = trap
-        Range("AA20").Value = battery
+        Range("AA20").Value = firefly
         Range("AA20").Font.ColorIndex = 6
         Range("AA26:AC26").Value = gate
         Range("Z26:Z32").Value = wall
@@ -440,19 +418,58 @@ Sub LoadLevel()
         Range("AE24").Value = flower
         Range("AG8").Value = shop
         Range("N27").Value = firefly
+        Range("N27").Font.ColorIndex = 6
         Range("I10").Value = usb
         Range("I10").Font.Color = vbGreen
-        Range("A1:AR4").Value = wall
-        Range("AO5:AR36").Value = wall
-        Range("A33:AN36").Value = wall
-        Range("A5:D32").Value = wall
-        Range("A1:AR4").Interior.Color = vbBlack
-        Range("AO5:AR36").Interior.Color = vbBlack
-        Range("A33:AN36").Interior.Color = vbBlack
-        Range("A5:D32").Interior.Color = vbBlack
         Range("AW3").Font.Size = 26
         Range("BB15").Font.Size = 15
+
     End If
 
-End Sub
+    If level = 1 Then
+
+        'Redraw UI
+        AddUI()
+        UpdateUI()
+
+
+        'Player Pos
+        r(0) = 10
+        c(0) = 10
+
+        'Enemy
+        le_r(0) = 16 : le_c(0) = 16
+        le_isRevealed = False
+
+
+
+        'Map Blocking
+        Range("AM5").Value = escape
+        Range("AJ7").Value = trap
+        Range("R13").Value = firefly
+        Range("R13").Font.ColorIndex = 6
+        'Range("AA26:AC26").Value = gate
+        'Range("Z26:Z32").Value = wall
+        'Range("AD26:AD32").Value = wall
+        Range("AB28").Value = trap
+        Range("J8").Value = rock
+        Range("AG29").Value = puddle
+        Range("F9").Value = mushroom
+        Range("P11").Value = shrub
+        Range("G20").Value = flower
+        Range("AG20").Value = shop
+        Range("F8").Value = firefly
+        Range("F8").Font.ColorIndex = 6
+        Range("AW3").Font.Size = 26
+        Range("BB15").Font.Size = 15
+
+        ShowVis()
+        ShowPlayer()
+        ShowEnemy()
+
+    End If
+
+
+End Function
+
 

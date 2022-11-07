@@ -4,6 +4,7 @@
     Application.OnKey "{UP}", "moveUp"
     Application.OnKey "{DOWN}", "moveDown"
     Application.OnKey "{RETURN}", "interact"
+    Application.OnKey "{INSERT}", "placeItem"
 End Sub
 
 Sub moveLeft()
@@ -30,11 +31,14 @@ Sub moveDown()
     MovePlayer
     MoveEnemy
 End Sub
+
 Sub freeKeys()
     Application.OnKey "LEFT"
     Application.OnKey "RIGHT"
     Application.OnKey "UP"
     Application.OnKey "DOWN"
     Application.OnKey "RETURN"
+    Application.OnKey "INSERT"
 End Sub
+
 

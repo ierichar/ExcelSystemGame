@@ -1,4 +1,4 @@
-﻿Imports System.Net.Mime.MediaTypeNames
+﻿'Imports System.Net.Mime.MediaTypeNames
 
 Public rinc As Integer, cinc As Integer
 Public vis As Integer
@@ -9,6 +9,7 @@ Public level As Integer
 Public isPickedUp As Boolean
 
 Public trap As Integer
+Public ptrap As Integer
 Public key As Integer
 Public wall As Integer
 Public rock As Integer
@@ -61,6 +62,7 @@ Sub StartGame()
     battery = 10
     key = 11
     usb = 12
+    ptrap = 15
 
     ' Changing states
     gate = 13
@@ -92,17 +94,17 @@ Sub StartGame()
     Range("A33:AN36").Interior.Color = vbBlack
     Range("A5:D32").Interior.Color = vbBlack
     Range("AW3").Font.Size = 26
-    Range("AW11").Font.Size = 26
+    'Range("AW11").Font.Size = 26
     Range("BB11").Font.Size = 15
-    Range("AW11").Value = "Light Data "
-    Range("AW10").Font.Size = 26
-    Range("AW10").Value = "Health"
+    'Range("AW11").Value = "Light Data "
+    'Range("AW10").Font.Size = 26
+    'Range("AW10").Value = "Health"
 
     'sets level back to 0
     level = 0
 
     'loads in the level 1 values
-    LoadLevel
+    LoadLevel()
 
     'Player Variables
     ReDim r(1)
@@ -110,6 +112,7 @@ Sub StartGame()
     r(0) = 10
     c(0) = 10
     rinc = 0 : cinc = 0
+    health = 3
     vis = 0
     lightData = 0
 
@@ -129,12 +132,19 @@ Sub StartGame()
     le_r(0) = 16 : le_c(0) = 16
     le_rinc = 0 : le_cinc = 0
     le_isRevealed = False
+    le_isDestroyed = False
+
+    'Player Trap Values
+    ReDim pt_r(1)
+    ReDim pt_c(1)
+    pt_r(0) = 0 : pt_c(0) = 0
+    pt_isPlaced = False
 
     'bind keys and render player
     bindKeys
-    ShowVis
-    ShowPlayer
-    AddUI
+    ShowVis()
+    ShowPlayer()
+    AddUI()
 
 End Sub
 
@@ -143,13 +153,18 @@ Sub ShowPlayer()
     Cells(r(0), c(0)).Interior.Color = vbRed
 End Sub
 Sub ShowEnemy()
-    Cells(le_r(0), le_c(0)).Interior.Color = vbGreen
+    If (RevealEnemy() = True And le_isDestroyed = False) Then
+        Cells(le_r(0), le_c(0)).Interior.Color = vbGreen
+    ElseIf (RevealEnemy() = True And le_isDestroyed = False) Then
+        Cells(le_r(0), le_c(0)).Interior.Color = vbGrey
+    Else : Cells(le_r(0), le_c(0)).Interior.Color = vbBlack
+    End If
 End Sub
 
 '=================================ShowVis=====================================
 Sub ShowVis()
     Range(Cells(r(0) - vis, c(0) - vis), Cells(r(0) + vis, c(0) + vis)).Interior.ColorIndex = 15
-    ShowEnemy
+    ShowEnemy()
 End Sub
 
 '--------------------------UPDATE AND MOVE PLAYER----------------------------------------------------
@@ -184,12 +199,12 @@ Sub MovePlayer()
         End If
 
         'updating functions
-        Hit
-        Recharge
-        ShowVis
-        ShowPlayer
-        UpdateUI
-        
+        Hit()
+        Recharge()
+        ShowVis()
+        ShowPlayer()
+        UpdateUI()
+
         'TODO: FUNCTION FOR THIS checks light data and informs player maybe change to UI boolean check to permission levels
         If lightData = 30 And isHalfway = False Then
             MsgBox "The USB device in your possesion whirls. A bar on the face of the device is half way full"
@@ -211,6 +226,7 @@ Function RevealEnemy()
         le_isRevealed = True
         Debug.Print("enemy found player!")
         RevealEnemy = True
+
     Else : le_isRevealed = False
     End If
 End Function
@@ -219,7 +235,11 @@ End Function
 'Pre: r(0), c(0), le_r(0), le_r(0)
 Sub MoveEnemy()
     Debug.Print("Moving enemy...")
-    If (RevealEnemy() = True) Then
+    If (Cells(le_r(0), le_c(0)).Value = 15) Then
+        le_isDestroyed = True
+    End If
+
+    If (RevealEnemy() = True And le_isDestroyed = False) Then
         Dim xDiff As Integer, yDiff As Integer
 
         yDiff = r(0) - le_r(0)
@@ -229,40 +249,54 @@ Sub MoveEnemy()
 
         If (yDiff >= 0 And xDiff >= 0) Then
             If (yDiff > xDiff) Then
-                le_r(0) = le_r(0) + 1
-            Else : le_c(0) = le_c(0) + 1
+                ' Check if future move is open
+                If (Cells(le_r(0) + 1, le_c(0)).Value <> wall) Then
+                    le_r(0) = le_r(0) + 1
+                End If
+            Else
+                If (Cells(le_r(0), le_c(0) + 1).Value <> wall) Then
+                    le_c(0) = le_c(0) + 1
+                End If
             End If
         ElseIf (yDiff >= 0 And xDiff <= 0) Then
             If (Abs(yDiff) > Abs(xDiff)) Then
-                le_r(0) = le_r(0) + 1
-            Else : le_c(0) = le_c(0) - 1
+                If (Cells(le_r(0) + 1, le_c(0)).Value <> wall) Then
+                    le_r(0) = le_r(0) + 1
+                End If
+            Else
+                If (Cells(le_r(0), le_c(0) + 1).Value <> wall) Then
+                    le_c(0) = le_c(0) - 1
+                End If
             End If
         ElseIf (yDiff <= 0 And xDiff >= 0) Then
             If (Abs(yDiff) > Abs(xDiff)) Then
-                le_r(0) = le_r(0) - 1
-            Else : le_c(0) = le_c(0) + 1
+                If (Cells(le_r(0) + 1, le_c(0)).Value <> wall) Then
+                    le_r(0) = le_r(0) - 1
+                End If
+            Else
+                If (Cells(le_r(0), le_c(0) + 1).Value <> wall) Then
+                    le_c(0) = le_c(0) + 1
+                End If
             End If
         ElseIf (yDiff <= 0 And xDiff <= 0) Then
             If (yDiff < xDiff) Then
-                le_r(0) = le_r(0) - 1
-            Else : le_c(0) = le_c(0) - 1
+                If (Cells(le_r(0) + 1, le_c(0)).Value = Null) Then
+                    le_r(0) = le_r(0) - 1
+                End If
+            Else
+                If (Cells(le_r(0), le_c(0) + 1).Value = Null) Then
+                    le_c(0) = le_c(0) - 1
+                End If
             End If
         End If
-        If (CheckCollision(le_r(0), le_c(0)) = True) Then
-            health = 3
+        If (xDiff = 0 And yDiff = 0) Then
+            Debug.Print("reduce player health")
+            health = health - 1
         End If
     End If
 
 End Sub
 
-'=====================CheckCollision===================
-Function CheckCollision(x1 As Integer, y1 As Integer) As Boolean
-    'check cell of direction vector
-    If (Cells(x1, y1) = Cells(c(0), r(0))) Then
-        CheckCollision = True
-    Else : CheckCollision = False
-    End If
-End Function
 
 '------------------------------INTERACTION CHECKS----------------------------------------------
 Sub interact()
@@ -352,6 +386,17 @@ Sub interact()
         Range("AW3").Value = "A hard sturdy wall. Looks impenetrable"
 
     End If
+
+End Sub
+
+'-------------------------------Place Item-------------------------------------
+'Click on item in inventory, then press p to place it
+Sub placeItem()
+    Debug.Print("Placing item")
+    If (ActiveCell.Value = ptrap) Then
+        Cells(r(0), c(0)).Value = ActiveCell.Value
+        ActiveCell.Value = Null
+    End If
 End Sub
 
 '--------------------------------PLAYER ON VALUE IN CELL ----------------------------------------
@@ -387,6 +432,7 @@ Sub AddUI()
     ' Health bar
     Range("AT4", "bd34").Interior.Color = RGB(239, 222, 205)
     Range("AY4").Value = "Health:"
+    Range("BA4").Value = health
     ' Batteries
     Range("AY6").Value = "Light Strength:"
     Range("AY11").Interior.Color = vbRed
@@ -395,8 +441,12 @@ Sub AddUI()
     Range("AZ9").Value = 3
     Range("AZ8").Value = 4
     Range("AZ11", "AZ7").Font.Size = 18
+
     ' Item inventory Area
     Range("AU28", "BC33").Interior.Color = RGB(245, 245, 220)
+    'Player Traps
+    Range("AU28").Value = 15
+
     ' Currency
     Range("AY13").Value = "Bits:"
     Range("AY15").Value = "Light Data: "
@@ -406,6 +456,10 @@ Sub AddUI()
 
 End Sub
 Sub UpdateUI()
+    ' Update displayed health
+    Range("BA4").Value = health
+
+    ' Update visibility
     If vis = 0 Then
         Range("AY11").Interior.Color = RGB(239, 222, 205)
     End If
@@ -455,4 +509,5 @@ Sub LoadLevel()
     End If
 
 End Sub
+
 

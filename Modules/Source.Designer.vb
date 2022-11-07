@@ -1,7 +1,7 @@
 
-﻿'Imports System.Net.Mime.MediaTypeNames
-﻿
+
 'Imports System.Diagnostics
+'Imports System.Net.Mime.MediaTypeNames
 
 Public rinc As Integer, cinc As Integer
 Public vis As Integer
@@ -32,11 +32,16 @@ Public mushroomSearch As Boolean
 Public puddleSearch As Boolean
 Public isHalfway As Boolean
 
+Public rockRevealed As Boolean
+
+
 Public rockRefresh As Integer
 Public shrubRefresh As Integer
 Public mushroomRefresh As Integer
 Public flowerRefresh As Integer
 Public puddleRefresh As Integer
+
+Public rockVisible As Boolean
 
 
 Public lightData As Integer
@@ -46,6 +51,9 @@ Public level As Integer
 
 Dim r() As Integer, c() As Integer
 Dim le_r() As Integer, le_c() As Integer
+
+Dim rockPic As Shape
+
 Sub StartGame()
 
     'Sets Values for enviornment
@@ -163,14 +171,15 @@ Sub MovePlayer()
         End If
 
         'updating functions
-        Collide
-        ShowVis
-        ShowPlayer
-        ShowEnemy
-        MoveEnemy
-        UpdateUI
+        Collide()
+        ShowVis()
+        ShowPlayer()
+        ShowEnemy()
+        MoveEnemy()
+        UpdateUI()
         AuthorityLevelCheck(level)
-        SearchRefresh
+        SearchRefresh()
+        RenderImages()
 
     End If
 End Sub
@@ -192,7 +201,7 @@ End Function
 'Pre: r(0), c(0), le_r(0), le_r(0)
 Sub MoveEnemy()
     Debug.Print("Moving enemy...")
-    If (Cells(le_r(0), le_c(0)).Value = 15) Then
+    If (Cells(le_r(0), le_c(0)).Value = 16) Then
         le_isDestroyed = True
     End If
 
@@ -356,7 +365,7 @@ Sub SearchRefresh()
     If (flowerSearch = True And spaceDiscovered = flowerRefresh + 20) Then
         flowerSearch = False
     End If
-    
+
     If (mushroomSearch = False) Then
         mushroomRefresh = spaceDiscovered
     End If
@@ -370,7 +379,7 @@ Sub SearchRefresh()
     If (puddleSearch = True And spaceDiscovered = puddleRefresh + 20) Then
         puddleSearch = False
     End If
-    
+
 End Sub
 
 '-------------------------------Place Item-------------------------------------
@@ -425,6 +434,112 @@ Function AuthorityLevelCheck(level As Integer)
         End If
     End If
 End Function
+Sub RenderImages()
+
+    Dim visRng As Range
+    Dim levelRng As Range
+    Dim cell As Range
+    Dim pic As Picture
+    For Each pic In Sheets("Sheet1").Pictures
+        pic.Delete
+    Next pic
+
+    Set visRng = Range(Cells(r(0) - vis, c(0) - vis), Cells(r(0) + vis, c(0) + vis))
+    Set levelRng = Range("A1:AR36")
+
+    For Each cell In levelRng
+        If cell.Value = firefly Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\firefly.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = 25
+            Image.ShapeRange.Width = 25
+
+        End If
+
+        If cell.Value = usb Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\usb.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = 25
+            Image.ShapeRange.Width = 25
+
+        End If
+    Next cell
+
+    For Each cell In visRng
+        If cell.Value = firefly Then
+            cell.Font.ColorIndex = 15
+        End If
+
+        If cell.Value = rock Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\rock.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = 25
+            Image.ShapeRange.Width = 25
+
+        End If
+
+        If cell.Value = shrub Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\shrub.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = 25
+            Image.ShapeRange.Width = 25
+
+        End If
+
+        If cell.Value = flower Then
+            cell.Font.ColorIndex = 15
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\flower.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = 25
+            Image.ShapeRange.Width = 25
+
+        End If
+
+        If cell.Value = mushroom Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\mushroom.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = 25
+            Image.ShapeRange.Width = 25
+
+        End If
+
+        If cell.Value = puddle Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\puddle.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = 25
+            Image.ShapeRange.Width = 25
+
+        End If
+
+
+    Next cell
+
+
+
+
+End Sub
+
 
 '------------------------------------------UI ADDING AND UPDATING---------------------------------
 Sub AddUI()
@@ -474,10 +589,18 @@ Sub UpdateUI()
         Range("AY9").Interior.Color = vbGreen
     End If
 End Sub
+
+
 '----------------------------------------------LOAIDNG LEVELS-----------------------------------------
 Function LoadLevel(level As Integer)
     'Clear All Values
     Cells.Clear
+    Dim pic As Picture
+    For Each pic In Sheets("Sheet1").Pictures
+        pic.Delete
+    Next pic
+
+
 
     'Set Bound of Level
     Range("E5:AN32").Interior.Color = vbBlack
@@ -499,6 +622,10 @@ Function LoadLevel(level As Integer)
     mushroomSearch = False
     puddleSearch = False
 
+    rockVisible = False
+
+    rockRevealed = False
+
     rockRefresh = 0
     shrubRefresh = 0
     flowerRefresh = 0
@@ -514,10 +641,10 @@ Function LoadLevel(level As Integer)
     If level = 0 Then
 
 
+
         Range("AA32").Value = escape
         Range("T5:T32").Value = trap
         Range("AA20").Value = firefly
-        Range("AA20").Font.ColorIndex = 6
         Range("AA26:AC26").Value = gate
         Range("Z26:Z32").Value = wall
         Range("AD26:AD32").Value = wall
@@ -529,11 +656,20 @@ Function LoadLevel(level As Integer)
         Range("AE24").Value = rock
         Range("AG8").Value = shop
         Range("N27").Value = firefly
-        Range("N27").Font.ColorIndex = 6
         Range("I10").Value = usb
-        Range("I10").Font.Color = vbGreen
         Range("AW3").Font.Size = 26
         Range("BB15").Font.Size = 15
+
+        If Range("I10").Value = usb Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\usb.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+            Image.Top = Range("I10").Top
+            Image.Left = Range("I10").Left
+            Image.ShapeRange.Height = 25
+            Image.ShapeRange.Width = 25
+        End If
+        'RenderImages
 
     End If
 
@@ -582,6 +718,7 @@ Function LoadLevel(level As Integer)
 
 
 End Function
+
 
 
 

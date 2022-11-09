@@ -85,14 +85,14 @@ Sub StartGame()
 
     'loads in the level 1 values
     level = 0
-    LoadLevel(0)
+    LoadLevel (0)
 
     'Player Variables
     ReDim r(1)
     ReDim c(1)
     r(0) = 10
     c(0) = 10
-    rinc = 0 : cinc = 0
+    rinc = 0: cinc = 0
     health = 3
     vis = 0
     authorityLevel = 0
@@ -100,23 +100,23 @@ Sub StartGame()
     'Enemy Values
     ReDim le_r(1)
     ReDim le_c(1)
-    le_r(0) = 16 : le_c(0) = 16
-    le_rinc = 0 : le_cinc = 0
+    le_r(0) = 16: le_c(0) = 16
+    le_rinc = 0: le_cinc = 0
     le_isRevealed = False
     le_isDestroyed = False
 
     'Player Trap Values
     ReDim pt_r(1)
     ReDim pt_c(1)
-    pt_r(0) = 0 : pt_c(0) = 0
+    pt_r(0) = 0: pt_c(0) = 0
     pt_isPlaced = False
 
     'bind keys and render player
     bindKeys
-    ShowVis()
-    ShowPlayer()
-    ShowEnemy()
-    AddUI()
+    ShowVis
+    ShowPlayer
+    ShowEnemy
+    AddUI
 
 End Sub
 
@@ -125,12 +125,12 @@ Sub ShowPlayer()
     Cells(r(0), c(0)).Interior.Color = vbRed
 End Sub
 Sub ShowEnemy()
-    Debug.Print("revealed = " & le_isRevealed & ", destroyed = " & le_isDestroyed)
+    Debug.Print ("revealed = " & le_isRevealed & ", destroyed = " & le_isDestroyed)
     If (le_isRevealed = True And le_isDestroyed = False) Then
         Cells(le_r(0), le_c(0)).Interior.Color = vbGreen
         'ElseIf (le_isRevealed = True And le_isDestroyed = False) Then
         'Cells(le_r(0), le_c(0)).Interior.Color = vbGray
-    Else : Cells(le_r(0), le_c(0)).Interior.Color = vbBlack
+    Else: Cells(le_r(0), le_c(0)).Interior.Color = vbBlack
     End If
 End Sub
 
@@ -182,30 +182,30 @@ Sub MovePlayer()
         End If
 
         'updating functions
-        Collide()
-        ShowVis()
-        ShowPlayer()
-        ShowEnemy()
-        MoveEnemy()
-        UpdateUI()
-        AuthorityLevelCheck(level)
-        SearchRefresh()
-        RenderImages()
-
+        Collide
+        ShowVis
+        ShowPlayer
+        ShowEnemy
+        MoveEnemy
+        UpdateUI
+        AuthorityLevelCheck (level)
+        SearchRefresh
+        RenderImages
+        ImgToUI
     End If
 End Sub
 
 '==================RevealEnemy===============
 'Pre: r(0), c(0), le_r(0), le_r(0), vis
 Function RevealEnemy()
-    Debug.Print("Checking reveal...")
+    Debug.Print ("Checking reveal...")
     If (Abs(r(0) - le_r(0)) <= vis) And (Abs(c(0) - le_c(0)) <= vis) Then
         le_isRevealed = True
         If (le_isDestroyed = False) Then
             Range("B38").Value = "A light-hungry moth has spotted you! Run away or trap it!"
         End If
         RevealEnemy = True
-    Else : le_isRevealed = False
+    Else: le_isRevealed = False
         If (le_isDestroyed = False) Then
             Range("B38").Value = "The moth loses you in the darkness."
         End If
@@ -216,7 +216,7 @@ End Function
 '==================MoveEnemy=================
 'Pre: r(0), c(0), le_r(0), le_r(0)
 Sub MoveEnemy()
-    Debug.Print("Moving enemy...")
+    Debug.Print ("Moving enemy...")
     If (Cells(le_r(0), le_c(0)).Value = 16) Then
         le_isDestroyed = True
     End If
@@ -226,8 +226,8 @@ Sub MoveEnemy()
 
         yDiff = r(0) - le_r(0)
         xDiff = c(0) - le_c(0)
-        Debug.Print("xDiff val: " & xDiff)
-        Debug.Print("yDiff val: " & yDiff)
+        Debug.Print ("xDiff val: " & xDiff)
+        Debug.Print ("yDiff val: " & yDiff)
 
         If (yDiff >= 0 And xDiff >= 0) Then
             If (yDiff > xDiff) Then
@@ -272,7 +272,7 @@ Sub MoveEnemy()
             End If
         End If
         If (xDiff = 0 And yDiff = 0) Then
-            Debug.Print("reduce player health")
+            Debug.Print ("reduce player health")
             health = health - 1
             'Testing 1 hit for now
             le_isDestroyed = True
@@ -325,6 +325,8 @@ Sub interact()
     End If
     If Cells(r(0), c(0) - 1).Value = shop Or Cells(r(0), c(0) + 1).Value = shop Or Cells(r(0) + 1, c(0)).Value = shop Or Cells(r(0) - 1, c(0)).Value = shop Then
         Range("B38").Value = "You find a shop but there is a painted sign that says OuT fOr LUnCh"
+        ' This is Joseph testing the shop for testing purposes, feel free to comment out the line for now
+        'UserForm1.Show
     End If
 
     If Cells(r(0), c(0) - 1).Value = puddle Or Cells(r(0), c(0) + 1).Value = puddle Or Cells(r(0) + 1, c(0)).Value = puddle Or Cells(r(0) - 1, c(0)).Value = puddle Then
@@ -404,7 +406,7 @@ End Sub
 '-------------------------------Place Item-------------------------------------
 'Click on item in inventory, then press p to place it
 Sub placeItem()
-    Debug.Print("Placing item")
+    Debug.Print ("Placing item")
     If (ActiveCell.Value = ptrap) Then
         Cells(r(0), c(0)).Value = ActiveCell.Value
         ActiveCell.Value = Null
@@ -423,7 +425,7 @@ Sub Collide()
         If level = 0 Then
             Range("B38").Value = "This seems like the way out! Next Level Reached"
             level = level + 1
-            LoadLevel(level)
+            LoadLevel (level)
         End If
     End If
 
@@ -438,6 +440,7 @@ Sub Collide()
         Cells(r(0), c(0)).Value = Null
         MsgBox "USB FOUND: Vision capabilites unlocked"
         Cells(r(0), c(0)).Font.Color = vbBlack
+        UpdateInventory
     End If
 End Sub
 
@@ -609,7 +612,44 @@ Sub UpdateUI()
     End If
 End Sub
 
-
+Sub UpdateInventory()
+    ' Adds values to the Inventory, so that RemoveInventory can delete the image and value associated much easier
+    Dim i As Integer, j As Integer, count As Integer
+    Dim usbRange As Range
+    For i = 47 To 55
+        If IsEmpty(Cells(28, i)) Then
+            ' This adds USB to the inventory
+            Cells(28, i).Value = 12
+            Exit For
+        End If
+    Next i
+End Sub
+Sub ImgToUI()
+    ' Adds images to the Inventory associated with the Range, only works for usb ATM
+    Dim invRange As Range
+    Dim cell As Range
+    Set invRange = Range(Cells(28, 47), Cells(28, 55))
+    For Each cell In invRange
+        If cell.Value = usb Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\usb.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight + 5
+        End If
+    Next cell
+End Sub
+Sub RemoveInventory(invValue As Integer)
+    'Deletes the Image associated with the given value
+    Dim i As Integer
+    For i = 47 To 55
+        If Cells(28, i).Value = invValue Then
+            Cells(28, i).Value = Null
+            Exit For
+        End If
+    Next i
+End Sub
 '----------------------------------------------LOAIDNG LEVELS-----------------------------------------
 Function LoadLevel(level As Integer)
     'Clear All Values
@@ -695,16 +735,16 @@ Function LoadLevel(level As Integer)
     If level = 1 Then
 
         'Redraw UI
-        AddUI()
-        UpdateUI()
-
+        AddUI
+        UpdateUI
+        UpdateInventory
 
         'Player Pos
         r(0) = 10
         c(0) = 10
 
         'Enemy
-        le_r(0) = 16 : le_c(0) = 16
+        le_r(0) = 16: le_c(0) = 16
         le_isRevealed = False
 
 
@@ -729,14 +769,15 @@ Function LoadLevel(level As Integer)
         Range("B38").Font.Size = gameHeight
         Range("BB15").Font.Size = (gameHeight - 10)
 
-        ShowVis()
-        ShowPlayer()
-        ShowEnemy()
+        ShowVis
+        ShowPlayer
+        ShowEnemy
 
     End If
 
 
 End Function
+
 
 
 

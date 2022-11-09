@@ -11,25 +11,21 @@ Sub moveLeft()
     cinc = -1
     rinc = 0
     MovePlayer
-    MoveEnemy
 End Sub
 Sub moveRight()
     cinc = 1
     rinc = 0
     MovePlayer
-    MoveEnemy
 End Sub
 Sub moveUp()
     cinc = 0
     rinc = -1
     MovePlayer
-    MoveEnemy
 End Sub
 Sub moveDown()
     cinc = 0
     rinc = 1
     MovePlayer
-    MoveEnemy
 End Sub
 
 Sub freeKeys()
@@ -40,5 +36,6 @@ Sub freeKeys()
     Application.OnKey "RETURN"
     Application.OnKey "INSERT"
 End Sub
+
 
 

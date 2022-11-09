@@ -1,4 +1,4 @@
-﻿
+﻿Public gameHeight As Integer, gameRow As Integer
 
 Public rinc As Integer, cinc As Integer
 Public vis As Integer
@@ -54,6 +54,11 @@ Dim le_r() As Integer, le_c() As Integer
 Dim rockPic As Shape
 
 Sub StartGame()
+    'Set width/height of cells
+    gameWidth = 6
+    gameHeight = 30
+    Range("A:BH").ColumnWidth = gameWidth
+    Range("1:40").RowHeight = gameHeight
 
     'Sets Values for enviornment
 
@@ -140,11 +145,17 @@ Sub MovePlayer()
     If rinc <> 0 Or cinc <> 0 Then
         'sets past position to vision color
         Cells(r(0), c(0)).Interior.ColorIndex = 15
+
+        'footprint placed and spaceDiscovered incremented
         If Cells(r(0), c(0)).Value <> footprints Then
-            Cells(r(0), c(0)).Value = footprints
+            If (Cells(r(0), c(0)).Value <> ptrap) Then
+                Cells(r(0), c(0)).Value = footprints
+            End If
             spaceDiscovered = spaceDiscovered + 1
             Range("C37").Value = spaceDiscovered
         End If
+
+
         'if the cell you are moving to is black or the vision color then run
         If (Cells(r(0) + rinc, c(0) + cinc).Interior.Color = vbBlack Or Cells(r(0) + rinc, c(0) + cinc).Interior.ColorIndex = 15) Then
             'collision  condition
@@ -462,8 +473,8 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
 
         End If
 
@@ -473,15 +484,15 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
 
         End If
     Next cell
 
     For Each cell In visRng
         If cell.Value = firefly Then
-            cell.Font.ColorIndex = 15
+            cell.Font.ColorIndex = gameHeight - 10
         End If
 
         If cell.Value = rock Then
@@ -490,8 +501,8 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight + 5
 
         End If
 
@@ -501,8 +512,8 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
 
         End If
 
@@ -513,8 +524,8 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
 
         End If
 
@@ -524,8 +535,8 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
 
         End If
 
@@ -535,8 +546,8 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
 
         End If
 
@@ -561,7 +572,7 @@ Sub AddUI()
     Range("AZ10").Value = 2
     Range("AZ9").Value = 3
     Range("AZ8").Value = 4
-    Range("AZ11", "AZ7").Font.Size = 18
+    Range("AZ11", "AZ7").Font.Size = (gameHeight - 5)
 
     ' Item inventory Area
     Range("AU28", "BC33").Interior.Color = RGB(245, 245, 220)
@@ -573,7 +584,7 @@ Sub AddUI()
     Range("AY15").Value = "Light Data: "
     ' Font Size and Center Alignment
     Range("AT4", "bd34").HorizontalAlignment = xlCenter
-    Range("AT4", "bd34").Font.Size = 18
+    Range("AT4", "bd34").Font.Size = (gameHeight - 5)
 
 End Sub
 Sub UpdateUI()
@@ -612,7 +623,7 @@ Function LoadLevel(level As Integer)
 
     'Set Bound of Level
     Range("E5:AN32").Interior.Color = vbBlack
-    Range("E5:AN32").Font.Size = 18
+    Range("E5:AN32").Font.Size = (gameHeight - 5)
     Range("A1:AR4").Value = wall
     Range("AO5:AR36").Value = wall
     Range("A33:AN36").Value = wall
@@ -665,8 +676,8 @@ Function LoadLevel(level As Integer)
         Range("AG8").Value = shop
         Range("N27").Value = firefly
         Range("I10").Value = usb
-        Range("B38").Font.Size = 26
-        Range("BB15").Font.Size = 15
+        Range("B38").Font.Size = gameHeight
+        Range("BB15").Font.Size = (gameHeight - 10)
 
         If Range("I10").Value = usb Then
             Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\usb.png"
@@ -674,8 +685,8 @@ Function LoadLevel(level As Integer)
                     
             Image.Top = Range("I10").Top
             Image.Left = Range("I10").Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight + 5
         End If
         'RenderImages
 
@@ -715,8 +726,8 @@ Function LoadLevel(level As Integer)
         Range("AG20").Value = shop
         Range("F8").Value = firefly
         Range("F8").Font.ColorIndex = 6
-        Range("B38").Font.Size = 26
-        Range("BB15").Font.Size = 15
+        Range("B38").Font.Size = gameHeight
+        Range("BB15").Font.Size = (gameHeight - 10)
 
         ShowVis()
         ShowPlayer()
@@ -726,6 +737,7 @@ Function LoadLevel(level As Integer)
 
 
 End Function
+
 
 
 

@@ -1,12 +1,11 @@
-﻿
-
-'Imports System.Diagnostics
-'Imports System.Net.Mime.MediaTypeNames
+﻿Public gameHeight As Integer, gameRow As Integer
 
 Public rinc As Integer, cinc As Integer
 Public vis As Integer
 Public health As Integer
 
+Public le_isRevealed As Boolean
+Public le_isDestroyed As Boolean
 
 Public trap As Integer
 Public ptrap As Integer
@@ -55,6 +54,11 @@ Dim le_r() As Integer, le_c() As Integer
 Dim rockPic As Shape
 
 Sub StartGame()
+    'Set width/height of cells
+    gameWidth = 6
+    gameHeight = 30
+    Range("A:BH").ColumnWidth = gameWidth
+    Range("1:40").RowHeight = gameHeight
 
     'Sets Values for enviornment
 
@@ -81,14 +85,14 @@ Sub StartGame()
 
     'loads in the level 1 values
     level = 0
-    LoadLevel (0)
+    LoadLevel(0)
 
     'Player Variables
     ReDim r(1)
     ReDim c(1)
     r(0) = 10
     c(0) = 10
-    rinc = 0: cinc = 0
+    rinc = 0 : cinc = 0
     health = 3
     vis = 0
     authorityLevel = 0
@@ -96,22 +100,23 @@ Sub StartGame()
     'Enemy Values
     ReDim le_r(1)
     ReDim le_c(1)
-    le_r(0) = 16: le_c(0) = 16
-    le_rinc = 0: le_cinc = 0
+    le_r(0) = 16 : le_c(0) = 16
+    le_rinc = 0 : le_cinc = 0
     le_isRevealed = False
     le_isDestroyed = False
 
     'Player Trap Values
     ReDim pt_r(1)
     ReDim pt_c(1)
-    pt_r(0) = 0: pt_c(0) = 0
+    pt_r(0) = 0 : pt_c(0) = 0
     pt_isPlaced = False
 
     'bind keys and render player
     bindKeys
-    ShowVis
-    ShowPlayer
-    AddUI
+    ShowVis()
+    ShowPlayer()
+    ShowEnemy()
+    AddUI()
 
 End Sub
 
@@ -120,18 +125,18 @@ Sub ShowPlayer()
     Cells(r(0), c(0)).Interior.Color = vbRed
 End Sub
 Sub ShowEnemy()
-    If (RevealEnemy() = True And le_isDestroyed = False) Then
+    Debug.Print("revealed = " & le_isRevealed & ", destroyed = " & le_isDestroyed)
+    If (le_isRevealed = True And le_isDestroyed = False) Then
         Cells(le_r(0), le_c(0)).Interior.Color = vbGreen
-    ElseIf (RevealEnemy() = True And le_isDestroyed = False) Then
-        Cells(le_r(0), le_c(0)).Interior.Color = vbGrey
-    Else: Cells(le_r(0), le_c(0)).Interior.Color = vbBlack
+        'ElseIf (le_isRevealed = True And le_isDestroyed = False) Then
+        'Cells(le_r(0), le_c(0)).Interior.Color = vbGray
+    Else : Cells(le_r(0), le_c(0)).Interior.Color = vbBlack
     End If
 End Sub
 
 '=================================ShowVis=====================================
 Sub ShowVis()
     Range(Cells(r(0) - vis, c(0) - vis), Cells(r(0) + vis, c(0) + vis)).Interior.ColorIndex = 15
-    ShowEnemy
 End Sub
 
 '--------------------------UPDATE AND MOVE PLAYER----------------------------------------------------
@@ -140,11 +145,17 @@ Sub MovePlayer()
     If rinc <> 0 Or cinc <> 0 Then
         'sets past position to vision color
         Cells(r(0), c(0)).Interior.ColorIndex = 15
+
+        'footprint placed and spaceDiscovered incremented
         If Cells(r(0), c(0)).Value <> footprints Then
-            Cells(r(0), c(0)).Value = footprints
+            If (Cells(r(0), c(0)).Value <> ptrap) Then
+                Cells(r(0), c(0)).Value = footprints
+            End If
             spaceDiscovered = spaceDiscovered + 1
             Range("C37").Value = spaceDiscovered
         End If
+
+
         'if the cell you are moving to is black or the vision color then run
         If (Cells(r(0) + rinc, c(0) + cinc).Interior.Color = vbBlack Or Cells(r(0) + rinc, c(0) + cinc).Interior.ColorIndex = 15) Then
             'collision  condition
@@ -171,37 +182,41 @@ Sub MovePlayer()
         End If
 
         'updating functions
-        Collide
-        ShowVis
-        ShowPlayer
-        ShowEnemy
-        MoveEnemy
-        UpdateUI
-        AuthorityLevelCheck (level)
-        SearchRefresh
-        RenderImages
-        'UpdateInventory
-        ImgToUI
+        Collide()
+        ShowVis()
+        ShowPlayer()
+        ShowEnemy()
+        MoveEnemy()
+        UpdateUI()
+        AuthorityLevelCheck(level)
+        SearchRefresh()
+        RenderImages()
+
     End If
 End Sub
 
 '==================RevealEnemy===============
 'Pre: r(0), c(0), le_r(0), le_r(0), vis
 Function RevealEnemy()
-    Debug.Print ("Checking reveal...")
-    If Abs(r(0) - le_r(0)) <= vis And Abs(c(0) - le_r(0)) <= vis Then
+    Debug.Print("Checking reveal...")
+    If (Abs(r(0) - le_r(0)) <= vis) And (Abs(c(0) - le_c(0)) <= vis) Then
         le_isRevealed = True
-        Debug.Print ("enemy found player!")
+        If (le_isDestroyed = False) Then
+            Range("B38").Value = "A light-hungry moth has spotted you! Run away or trap it!"
+        End If
         RevealEnemy = True
-
-    Else: le_isRevealed = False
+    Else : le_isRevealed = False
+        If (le_isDestroyed = False) Then
+            Range("B38").Value = "The moth loses you in the darkness."
+        End If
+        RevealEnemy = False
     End If
 End Function
 
 '==================MoveEnemy=================
 'Pre: r(0), c(0), le_r(0), le_r(0)
 Sub MoveEnemy()
-    Debug.Print ("Moving enemy...")
+    Debug.Print("Moving enemy...")
     If (Cells(le_r(0), le_c(0)).Value = 16) Then
         le_isDestroyed = True
     End If
@@ -211,8 +226,8 @@ Sub MoveEnemy()
 
         yDiff = r(0) - le_r(0)
         xDiff = c(0) - le_c(0)
-        Debug.Print ("xDiff val: " & xDiff)
-        Debug.Print ("yDiff val: " & yDiff)
+        Debug.Print("xDiff val: " & xDiff)
+        Debug.Print("yDiff val: " & yDiff)
 
         If (yDiff >= 0 And xDiff >= 0) Then
             If (yDiff > xDiff) Then
@@ -231,13 +246,13 @@ Sub MoveEnemy()
                     le_r(0) = le_r(0) + 1
                 End If
             Else
-                If (Cells(le_r(0), le_c(0) + 1).Value <> wall) Then
+                If (Cells(le_r(0), le_c(0) - 1).Value <> wall) Then
                     le_c(0) = le_c(0) - 1
                 End If
             End If
         ElseIf (yDiff <= 0 And xDiff >= 0) Then
             If (Abs(yDiff) > Abs(xDiff)) Then
-                If (Cells(le_r(0) + 1, le_c(0)).Value <> wall) Then
+                If (Cells(le_r(0) - 1, le_c(0)).Value <> wall) Then
                     le_r(0) = le_r(0) - 1
                 End If
             Else
@@ -247,18 +262,21 @@ Sub MoveEnemy()
             End If
         ElseIf (yDiff <= 0 And xDiff <= 0) Then
             If (yDiff < xDiff) Then
-                If (Cells(le_r(0) + 1, le_c(0)).Value = Null) Then
+                If (Cells(le_r(0) - 1, le_c(0)).Value <> Null) Then
                     le_r(0) = le_r(0) - 1
                 End If
             Else
-                If (Cells(le_r(0), le_c(0) + 1).Value = Null) Then
+                If (Cells(le_r(0), le_c(0) - 1).Value <> Null) Then
                     le_c(0) = le_c(0) - 1
                 End If
             End If
         End If
         If (xDiff = 0 And yDiff = 0) Then
-            Debug.Print ("reduce player health")
+            Debug.Print("reduce player health")
             health = health - 1
+            'Testing 1 hit for now
+            le_isDestroyed = True
+            Range("B38").Value = "The moth strikes! You feel a sharp pain as it disppates."
         End If
     End If
 
@@ -271,10 +289,10 @@ Sub interact()
 
     If Cells(r(0), c(0) - 1).Value = rock Or Cells(r(0), c(0) + 1).Value = rock Or Cells(r(0) + 1, c(0)).Value = rock Or Cells(r(0) - 1, c(0)).Value = rock Then
         If rockSearch = True Then
-            Range("AW3").Value = "A plain rock"
+            Range("B38").Value = "A plain rock"
         End If
         If rockSearch = False Then
-            Range("AW3").Value = "You find a rock. It looks like its shimmering. You reach out to it and feel an energy transferred to you."
+            Range("B38").Value = "You find a rock. It looks like its shimmering. You reach out to it and feel an energy transferred to you."
             lightData = lightData + 10
             Range("BB15").Value = lightData
             rockSearch = True
@@ -284,10 +302,10 @@ Sub interact()
 
     If Cells(r(0), c(0) - 1).Value = shrub Or Cells(r(0), c(0) + 1).Value = shrub Or Cells(r(0) + 1, c(0)).Value = shrub Or Cells(r(0) - 1, c(0)).Value = shrub Then
         If shrubSearch = True Then
-            Range("AW3").Value = "A shrub. The berries look dull"
+            Range("B38").Value = "A shrub. The berries look dull"
         End If
         If shrubSearch = False Then
-            Range("AW3").Value = "You find a shrub. The colorful berries shine bright giving off a glow of energy"
+            Range("B38").Value = "You find a shrub. The colorful berries shine bright giving off a glow of energy"
             lightData = lightData + 10
             Range("BB15").Value = lightData
             shrubSearch = True
@@ -295,10 +313,10 @@ Sub interact()
     End If
     If Cells(r(0), c(0) - 1).Value = flower Or Cells(r(0), c(0) + 1).Value = flower Or Cells(r(0) + 1, c(0)).Value = flower Or Cells(r(0) - 1, c(0)).Value = flower Then
         If flowerSearch = True Then
-            Range("AW3").Value = "The same old flower"
+            Range("B38").Value = "The same old flower"
         End If
         If flowerSearch = False Then
-            Range("AW3").Value = "You find a flower. You lean down to sniff it and feel a burst of energy within you"
+            Range("B38").Value = "You find a flower. You lean down to sniff it and feel a burst of energy within you"
             lightData = lightData + 10
             Range("BB15").Value = lightData
             flowerSearch = True
@@ -306,18 +324,15 @@ Sub interact()
 
     End If
     If Cells(r(0), c(0) - 1).Value = shop Or Cells(r(0), c(0) + 1).Value = shop Or Cells(r(0) + 1, c(0)).Value = shop Or Cells(r(0) - 1, c(0)).Value = shop Then
-        Range("AW3").Value = "You find a shop but there is a painted sign that says OuT fOr LUnCh"
-        ' This is Joseph testing the shop for testing purposes, feel free to comment out the line for now
-        'UserForm1.Show
-        
+        Range("B38").Value = "You find a shop but there is a painted sign that says OuT fOr LUnCh"
     End If
 
     If Cells(r(0), c(0) - 1).Value = puddle Or Cells(r(0), c(0) + 1).Value = puddle Or Cells(r(0) + 1, c(0)).Value = puddle Or Cells(r(0) - 1, c(0)).Value = puddle Then
         If puddleSearch = True Then
-            Range("AW3").Value = "The same puddle as before but only your reflection stares back at you."
+            Range("B38").Value = "The same puddle as before but only your reflection stares back at you."
         End If
         If puddleSearch = False Then
-            Range("AW3").Value = "You find a puddle. Instead of your reflection it gives off an aura of energy"
+            Range("B38").Value = "You find a puddle. Instead of your reflection it gives off an aura of energy"
             lightData = lightData + 10
             Range("BB15").Value = lightData
             puddleSearch = True
@@ -326,10 +341,10 @@ Sub interact()
     End If
     If Cells(r(0), c(0) - 1).Value = mushroom Or Cells(r(0), c(0) + 1).Value = mushroom Or Cells(r(0) + 1, c(0)).Value = mushroom Or Cells(r(0) - 1, c(0)).Value = mushroom Then
         If mushroomSearch = True Then
-            Range("AW3").Value = "The same mushroom but now much darker tones fill the spots on the cap"
+            Range("B38").Value = "The same mushroom but now much darker tones fill the spots on the cap"
         End If
         If mushroomSearch = False Then
-            Range("AW3").Value = "You find a mushroom. The spots on the cap seem to be glowing and give off energy"
+            Range("B38").Value = "You find a mushroom. The spots on the cap seem to be glowing and give off energy"
             lightData = lightData + 10
             Range("BB15").Value = lightData
 
@@ -337,14 +352,14 @@ Sub interact()
     End If
     If Cells(r(0), c(0) - 1).Value = gate Or Cells(r(0), c(0) + 1).Value = gate Or Cells(r(0) + 1, c(0)).Value = gate Or Cells(r(0) - 1, c(0)).Value = gate Then
         If authorityLevel = 0 Then
-            Range("AW3").Value = "You find what seems like a gate. It has the same glow as the things around you but does not give it off."
+            Range("B38").Value = "You find what seems like a gate. It has the same glow as the things around you but does not give it off."
         End If
         If authorityLevel = 1 Then
-            Range("AW3").Value = "The gate has lost its glow and is swung open"
+            Range("B38").Value = "The gate has lost its glow and is swung open"
         End If
     End If
     If Cells(r(0), c(0) - 1).Value = wall Or Cells(r(0), c(0) + 1).Value = wall Or Cells(r(0) + 1, c(0)).Value = wall Or Cells(r(0) - 1, c(0)).Value = wall Then
-        Range("AW3").Value = "A hard sturdy wall. Looks impenetrable"
+        Range("B38").Value = "A hard sturdy wall. Looks impenetrable"
     End If
 End Sub
 
@@ -389,7 +404,7 @@ End Sub
 '-------------------------------Place Item-------------------------------------
 'Click on item in inventory, then press p to place it
 Sub placeItem()
-    Debug.Print ("Placing item")
+    Debug.Print("Placing item")
     If (ActiveCell.Value = ptrap) Then
         Cells(r(0), c(0)).Value = ActiveCell.Value
         ActiveCell.Value = Null
@@ -401,23 +416,21 @@ Sub Collide()
     If Cells(r(0), c(0)).Value = trap And vis > 0 Then
         vis = vis - 1
         Cells(r(0), c(0)).Value = Null
-        Range("AW3").Value = "YOU STEPPED ON A TRAP: Vision level decreased"
-        ' THIS ONLY TESTS IF REMOVEINVETORY IS WORKING, IT DOES WORK
-        'RemoveInventory (12)
+        Range("B38").Value = "YOU STEPPED ON A TRAP: Vision level decreased"
     End If
 
     If Cells(r(0), c(0)).Value = escape Then
         If level = 0 Then
-            Range("AW3").Value = "This seems like the way out! Next Level Reached"
+            Range("B38").Value = "This seems like the way out! Next Level Reached"
             level = level + 1
-            LoadLevel (level)
+            LoadLevel(level)
         End If
     End If
 
     If Cells(r(0), c(0)).Value = firefly And vis < 3 Then
         vis = vis + 1
         Cells(r(0), c(0)).Value = Null
-        Range("AW3").Value = "YOU CAPTURED A FIREFLY: USB recharged!"
+        Range("B38").Value = "YOU CAPTURED A FIREFLY: USB recharged!"
         Cells(r(0), c(0)).Font.Color = vbBlack
     End If
     If Cells(r(0), c(0)).Value = usb And vis = 0 Then
@@ -425,7 +438,6 @@ Sub Collide()
         Cells(r(0), c(0)).Value = Null
         MsgBox "USB FOUND: Vision capabilites unlocked"
         Cells(r(0), c(0)).Font.Color = vbBlack
-        UpdateInventory
     End If
 End Sub
 
@@ -461,8 +473,8 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
 
         End If
 
@@ -472,15 +484,15 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
 
         End If
     Next cell
 
     For Each cell In visRng
         If cell.Value = firefly Then
-            cell.Font.ColorIndex = 15
+            cell.Font.ColorIndex = gameHeight - 10
         End If
 
         If cell.Value = rock Then
@@ -489,8 +501,8 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight + 5
 
         End If
 
@@ -500,8 +512,8 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
 
         End If
 
@@ -512,8 +524,8 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
 
         End If
 
@@ -523,8 +535,8 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
 
         End If
 
@@ -534,8 +546,8 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
 
         End If
 
@@ -560,19 +572,19 @@ Sub AddUI()
     Range("AZ10").Value = 2
     Range("AZ9").Value = 3
     Range("AZ8").Value = 4
-    Range("AZ11", "AZ7").Font.Size = 18
+    Range("AZ11", "AZ7").Font.Size = (gameHeight - 5)
 
     ' Item inventory Area
     Range("AU28", "BC33").Interior.Color = RGB(245, 245, 220)
     'Player Traps
-    Range("AU28").Value = 15
+    Range("AU28").Value = ptrap
 
     ' Currency
     Range("AY13").Value = "Bits:"
     Range("AY15").Value = "Light Data: "
     ' Font Size and Center Alignment
     Range("AT4", "bd34").HorizontalAlignment = xlCenter
-    Range("AT4", "bd34").Font.Size = 16
+    Range("AT4", "bd34").Font.Size = (gameHeight - 5)
 
 End Sub
 Sub UpdateUI()
@@ -596,44 +608,7 @@ Sub UpdateUI()
         Range("AY9").Interior.Color = vbGreen
     End If
 End Sub
-Sub UpdateInventory()
-    ' Adds values to the Inventory, so that RemoveInventory can delete the image and value associated much easier
-    Dim i As Integer, j As Integer, count As Integer
-    Dim usbRange As Range
-    For i = 47 To 55
-            If IsEmpty(Cells(28, i)) Then
-                ' This adds USB to the inventory
-                Cells(28, i).Value = 12
-                Exit For
-            End If
-    Next i
-End Sub
-Sub ImgToUI()
-    ' Adds images to the Inventory associated with the Range, only works for usb ATM
-    Dim invRange As Range
-    Dim cell As Range
-    Set invRange = Range(Cells(28, 47), Cells(28, 55))
-    For Each cell In invRange
-        If cell.Value = usb Then
-            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\usb.png"
-            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
-            Image.Top = cell.Top
-            Image.Left = cell.Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
-        End If
-    Next cell
-End Sub
-Sub RemoveInventory(invValue As Integer)
-    'Deletes the Image associated with the given value
-    Dim i As Integer
-    For i = 47 To 55
-        If Cells(28, i).Value = invValue Then
-            Cells(28, i).Value = Null
-            Exit For
-        End If
-    Next i
-End Sub
+
 
 '----------------------------------------------LOAIDNG LEVELS-----------------------------------------
 Function LoadLevel(level As Integer)
@@ -648,7 +623,7 @@ Function LoadLevel(level As Integer)
 
     'Set Bound of Level
     Range("E5:AN32").Interior.Color = vbBlack
-    Range("E5:AN32").Font.Size = 18
+    Range("E5:AN32").Font.Size = (gameHeight - 5)
     Range("A1:AR4").Value = wall
     Range("AO5:AR36").Value = wall
     Range("A33:AN36").Value = wall
@@ -701,8 +676,8 @@ Function LoadLevel(level As Integer)
         Range("AG8").Value = shop
         Range("N27").Value = firefly
         Range("I10").Value = usb
-        Range("AW3").Font.Size = 26
-        Range("BB15").Font.Size = 15
+        Range("B38").Font.Size = gameHeight
+        Range("BB15").Font.Size = (gameHeight - 10)
 
         If Range("I10").Value = usb Then
             Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\usb.png"
@@ -710,8 +685,8 @@ Function LoadLevel(level As Integer)
                     
             Image.Top = Range("I10").Top
             Image.Left = Range("I10").Left
-            Image.ShapeRange.Height = 25
-            Image.ShapeRange.Width = 25
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight + 5
         End If
         'RenderImages
 
@@ -720,16 +695,16 @@ Function LoadLevel(level As Integer)
     If level = 1 Then
 
         'Redraw UI
-        AddUI
-        UpdateUI
-        UpdateInventory
+        AddUI()
+        UpdateUI()
+
 
         'Player Pos
         r(0) = 10
         c(0) = 10
 
         'Enemy
-        le_r(0) = 16: le_c(0) = 16
+        le_r(0) = 16 : le_c(0) = 16
         le_isRevealed = False
 
 
@@ -751,12 +726,12 @@ Function LoadLevel(level As Integer)
         Range("AG20").Value = shop
         Range("F8").Value = firefly
         Range("F8").Font.ColorIndex = 6
-        Range("AW3").Font.Size = 26
-        Range("BB15").Font.Size = 15
+        Range("B38").Font.Size = gameHeight
+        Range("BB15").Font.Size = (gameHeight - 10)
 
-        ShowVis
-        ShowPlayer
-        ShowEnemy
+        ShowVis()
+        ShowPlayer()
+        ShowEnemy()
 
     End If
 

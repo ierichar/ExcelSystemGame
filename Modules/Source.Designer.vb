@@ -824,7 +824,7 @@ Sub RemoveInventory(invValue As Integer)
         End If
     Next i
 End Sub
-'----------------------------------------------LOAIDNG LEVELS-----------------------------------------
+'----------------------------------------------LOADING LEVELS-----------------------------------------
 Function LoadLevel(level As Integer)
     'Clear All Values
     If level = 0 Then
@@ -1101,8 +1101,152 @@ Function LoadLevel(level As Integer)
 
     End If
 
+    If level = 2 Then
+        'Player pos
+        r(0) = 8 : c(0) = 12
+
+        'Enemy pos and state
+        le_r(0) = 8 : le_c(0) = 8
+        le_isRevealed = False
+        le_isDestoryed = False
+
+        Range("G7:AB") = wall   'top wall
+        Range("G8:G28") = wall  'left wall
+        Range("AB7:AB28") = wall 'right wall
+        Range("H28:X28") = wall 'bottom wall
+        Range("AA27") = wall
+
+        Range("I7:K8") = wall
+        Range("O8:O10") = wall
+        Range("P9") = wall
+        Range("X9") = wall
+        Range("R10") = wall
+        Range("U10") = wall
+        Range("Z10") = wall
+        Range("I11") = wall
+        Range("L11") = wall
+        Range("N11") = wall
+        Range("R11") = wall
+        Range("M12") = wall
+        Range("S12:T12") = wall
+        Range("Y12") = wall
+        Range("N13") = wall
+        Range("R13") = wall
+        Range("H14") = wall
+        Range("J14") = wall
+        Range("S14:T14") = wall
+        Range("W14") = wall
+        Range("T15") = wall
+        Range("Y15:Y16") = wall
+        Range("Q16:R16") = wall
+        Range("U16") = wall
+        Range("Y16") = wall
+        Range("K17") = wall
+        Range("M17:N:17") = wall
+        Range("Z17") = wall
+        Range("S18") = wall
+        Range("J19") = wall
+        Range("Q19:R19") = wall
+        Range("I20") = wall
+        Range("M20:N20") = wall
+        Range("S20:S22") = wall
+        Range("X20:Y20") = wall
+        Range("L21") = wall
+        Range("R20") = wall
+        Range("X20:Y20") = wall
+        Range("V21:V22") = wall
+        Range("Y22:Z22") = wall
+        Range("P23") = wall
+        Range("T23:U23") = wall
+        Range("J24") = wall
+        Range("Q24:Q25") = wall
+        Range("S24:S25") = wall
+        Range("L25") = wall
+        Range("W25:W26") = wall
+        Range("Z25") = wall
+        Range("R26") = wall
+        Range("U26") = wall
+        Range("AA26") = wall
+        Range("J27") = wall
+
+        'Fireflies
+        Range("I9") = firefly
+        Range("P8") = firefly
+        Range("Y17") = firefly
+        Range("L20") = firefly
+        Range("R25") = firefly
+
+        'Shrubs
+        Range("J9") = shrub
+        Range("I10") = shrub
+        Range("X25:Y25") = shrub
+        Range("V26") = shrub
+        Range("AA27") = shrub
+
+        'Rocks
+        Range("K15") = rock
+        Range("H16") = rock
+        Range("L16") = rock
+        Range("J18") = rock
+        Range("W9") = rock
+        Range("U11") = rock
+        Range("Y11") = rock
+        Range("X14") = rock
+
+        'Puddles
+        Range("Q9") = puddle
+        Range("V9") = puddle
+        Range("V12") = puddle
+        Range("Y13") = puddle
+        Range("I21") = puddle
+        Range("L24") = puddle
+        Range("K25") = puddle
+        Range("I26") = puddle
+
+        'Mushrooms
+        Range("W18") = mushroom
+        Range("U19") = mushroom
+        Range("X19") = mushroom
+        Range("V20") = mushroom
+        Range("O21") = mushroom
+        Range("Y21") = mushroom
+        Range("L22") = mushroom
+        Range("P22") = mushroom
+        Range("O24") = mushroom
+        Range("M26") = mushroom
+
+        'Flower
+        Range("Z9") = flower
+        Range("O16") = flower
+        Range("W19") = flower
+        Range("M21") = flower
+        Range("V23") = flower
+
+        'Traps
+        Range("P11:Q11") = trap
+        Range("O12:P12") = trap
+        Range("R12") = trap
+        Range("I13") = trap
+        Range("T16") = trap
+        Range("V19") = trap
+        Range("U20") = trap
+        Range("N21") = trap
+        Range("X21") = trap
+        Range("O22") = trap
+        Range("M24") = trap
+        Range("R24") = trap
+        Range("H27") = trap
+
+        'Shop
+        Range("S10") = shop
+
+        ShowVis()
+        ShowPlayer()
+        ShowEnemy()
+    End If
 
 End Function
+
 
 
 

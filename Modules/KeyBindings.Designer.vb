@@ -5,7 +5,7 @@
     Application.OnKey "{DOWN}", "moveDown"
     Application.OnKey "{RETURN}", "interact"
     Application.OnKey "{TAB}", "placeItem"
-    Application.OnKey "{BS}", "usePotion"
+    Application.OnKey "{CAPSLOCK}", "usePotion"
 End Sub
 
 Sub moveLeft()

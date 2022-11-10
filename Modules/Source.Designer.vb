@@ -22,7 +22,7 @@ Public puddle As Integer
 Public escape As Integer
 Public gate As Integer
 Public usb As Integer
-Public footprints As Integer
+Public footprints As String
 Public potion As Integer
 Public potionCount As Integer
 
@@ -33,6 +33,8 @@ Public mushroomSearch As Boolean
 Public puddleSearch As Boolean
 Public isHalfway As Boolean
 Public lightDataTut As Boolean
+Public mothTut As Boolean
+Public doorsTut As Boolean
 
 Public rockRevealed As Boolean
 
@@ -61,6 +63,7 @@ Dim rockPic As Shape
 
 Sub StartGame()
     'Set width/height of cells
+    Cells.Clear
     gameWidth = 6
     gameHeight = 30
     Range("A:BH").ColumnWidth = gameWidth
@@ -88,32 +91,40 @@ Sub StartGame()
     ' Changing states
     gate = 13
     escape = 14
-    footprints = 15
+    footprints = "."
 
     lightDataTut = False
 
-    'loads in the level 1 values
-    level = 0
-    LoadLevel(level)
 
-    'Player Variables
     ReDim r(1)
     ReDim c(1)
-    r(0) = 20
-    c(0) = 5
+
+
+    ReDim le_r(1)
+    ReDim le_c(1)
+
+    'loads in the level 1 values
+    level = 3
+    LoadLevel(3)
+
+    'Player Variables
+
+    'r(0) = 20
+    'c(0) = 5
     rinc = 0 : cinc = 0
     health = 3
-    vis = 0
+    vis = 3
     authorityLevel = 0
     lightData = 0
 
     'Enemy Values
-    ReDim le_r(1)
-    ReDim le_c(1)
-    le_r(0) = 16 : le_c(0) = 16
+
+    'le_r(0) = 16: le_c(0) = 16
     le_rinc = 0 : le_cinc = 0
     le_isRevealed = False
     le_isDestroyed = False
+    mothTut = False
+    doorsTut = False
 
     'Player Trap Values
     ReDim pt_r(1)
@@ -124,9 +135,9 @@ Sub StartGame()
     'bind keys and render player
     bindKeys
     ShowVis()
-    ShowPlayer()
     ShowEnemy()
     AddUI()
+    ShowPlayer()
 
     Range("AU28").Value = ptrap
     potionCount = 3
@@ -136,15 +147,74 @@ End Sub
 
 '----------------------------SHOW PLAYER AND VISION-------------------------------------------------
 Sub ShowPlayer()
-    Cells(r(0), c(0)).Interior.Color = vbRed
+    If rinc = 0 And cinc = 0 Then
+        Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\walkDown1.png"
+        Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+        Image.Top = Cells(r(0), c(0)).Top
+        Image.Left = Cells(r(0), c(0)).Left
+        Image.ShapeRange.Height = gameHeight + 5
+        Image.ShapeRange.Width = gameHeight + 5
+    End If
+    If rinc = 1 Then
+        Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\walkDown1.png"
+        Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+        Image.Top = Cells(r(0), c(0)).Top
+        Image.Left = Cells(r(0), c(0)).Left
+        Image.ShapeRange.Height = gameHeight + 5
+        Image.ShapeRange.Width = gameHeight + 5
+    End If
+    If rinc = -1 Then
+        Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\walkUp1.png"
+        Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+        Image.Top = Cells(r(0), c(0)).Top
+        Image.Left = Cells(r(0), c(0)).Left
+        Image.ShapeRange.Height = gameHeight + 5
+        Image.ShapeRange.Width = gameHeight + 5
+    End If
+    If cinc = 1 Then
+        Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\walkRight.png"
+        Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+        Image.Top = Cells(r(0), c(0)).Top
+        Image.Left = Cells(r(0), c(0)).Left
+        Image.ShapeRange.Height = gameHeight + 5
+        Image.ShapeRange.Width = gameHeight + 5
+    End If
+    If cinc = -1 Then
+        Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\walkLeft.png"
+        Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+        Image.Top = Cells(r(0), c(0)).Top
+        Image.Left = Cells(r(0), c(0)).Left
+        Image.ShapeRange.Height = gameHeight + 5
+        Image.ShapeRange.Width = gameHeight + 5
+    End If
+
+
+    'Cells(r(0), c(0)).Interior.Color = vbRed
 End Sub
 Sub ShowEnemy()
     Debug.Print("revealed = " & le_isRevealed & ", destroyed = " & le_isDestroyed)
-    If (le_isRevealed = True And le_isDestroyed = False) Then
-        Cells(le_r(0), le_c(0)).Interior.Color = vbGreen
-        'ElseIf (le_isRevealed = True And le_isDestroyed = False) Then
-        'Cells(le_r(0), le_c(0)).Interior.Color = vbGray
-    Else : Cells(le_r(0), le_c(0)).Interior.Color = vbBlack
+    If level > 0 Then
+        If (le_isRevealed = True And le_isDestroyed = False) Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\moth.png"
+        Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+        Image.Top = Cells(le_r(0), le_c(0)).Top
+            Image.Left = Cells(le_r(0), le_c(0)).Left
+            Image.ShapeRange.Height = gameHeight + 10
+            Image.ShapeRange.Width = gameHeight + 10
+
+            'Cells(le_r(0), le_c(0)).Interior.Color = vbGreen
+            'ElseIf (le_isRevealed = True And le_isDestroyed = False) Then
+            'Cells(le_r(0), le_c(0)).Interior.Color = vbGray
+        End If
+        If le_isRevealed = False Or le_isDestroyed Then
+            Cells(le_r(0), le_c(0)).Interior.Color = vbBlack
+        End If
     End If
 End Sub
 
@@ -194,18 +264,21 @@ Sub MovePlayer()
                 End If
             End If
         End If
-
+        Range("A1:AR36").Font.Color = vbBlack
         'updating functions
         Collide()
         ShowVis()
-        ShowPlayer()
-        ShowEnemy()
-        MoveEnemy()
+
+
         UpdateUI()
         AuthorityLevelCheck(level)
         SearchRefresh()
         RenderImages()
         ImgToUI()
+        ShowEnemy()
+        MoveEnemy()
+        ShowPlayer()
+        GameOverCheck()
     End If
 End Sub
 
@@ -231,75 +304,88 @@ End Function
 'Pre: r(0), c(0), le_r(0), le_r(0)
 Sub MoveEnemy()
     Debug.Print("Moving enemy...")
-    If (Cells(le_r(0), le_c(0)).Value = 16) Then
-        le_isDestroyed = True
-    End If
-
-    If (RevealEnemy() = True And le_isDestroyed = False) Then
-        Dim xDiff As Integer, yDiff As Integer
-
-        yDiff = r(0) - le_r(0)
-        xDiff = c(0) - le_c(0)
-        Debug.Print("xDiff val: " & xDiff)
-        Debug.Print("yDiff val: " & yDiff)
-
-        If (yDiff >= 0 And xDiff >= 0) Then
-            If (yDiff > xDiff) Then
-                ' Check if future move is open
-                If (Cells(le_r(0) + 1, le_c(0)).Value <> wall) Then
-                    le_r(0) = le_r(0) + 1
-                End If
-            Else
-                If (Cells(le_r(0), le_c(0) + 1).Value <> wall) Then
-                    le_c(0) = le_c(0) + 1
-                End If
-            End If
-        ElseIf (yDiff >= 0 And xDiff <= 0) Then
-            If (Abs(yDiff) > Abs(xDiff)) Then
-                If (Cells(le_r(0) + 1, le_c(0)).Value <> wall) Then
-                    le_r(0) = le_r(0) + 1
-                End If
-            Else
-                If (Cells(le_r(0), le_c(0) - 1).Value <> wall) Then
-                    le_c(0) = le_c(0) - 1
-                End If
-            End If
-        ElseIf (yDiff <= 0 And xDiff >= 0) Then
-            If (Abs(yDiff) > Abs(xDiff)) Then
-                If (Cells(le_r(0) - 1, le_c(0)).Value <> wall) Then
-                    le_r(0) = le_r(0) - 1
-                End If
-            Else
-                If (Cells(le_r(0), le_c(0) + 1).Value <> wall) Then
-                    le_c(0) = le_c(0) + 1
-                End If
-            End If
-        ElseIf (yDiff <= 0 And xDiff <= 0) Then
-            If (yDiff < xDiff) Then
-                If (Cells(le_r(0) - 1, le_c(0)).Value <> Null) Then
-                    le_r(0) = le_r(0) - 1
-                End If
-            Else
-                If (Cells(le_r(0), le_c(0) - 1).Value <> Null) Then
-                    le_c(0) = le_c(0) - 1
-                End If
-            End If
-        End If
-        If (xDiff = 0 And yDiff = 0) Then
-            Debug.Print("reduce player health")
-            health = health - 1
-            'Testing 1 hit for now
+    If level > 0 Then
+        If (Cells(le_r(0), le_c(0)).Value = 16) Then
             le_isDestroyed = True
-            Range("B38").Value = "The moth strikes! You feel a sharp pain as it disppates."
+        End If
+
+        If (RevealEnemy() = True And le_isDestroyed = False) Then
+            Dim xDiff As Integer, yDiff As Integer
+
+            yDiff = r(0) - le_r(0)
+            xDiff = c(0) - le_c(0)
+            Debug.Print("xDiff val: " & xDiff)
+            Debug.Print("yDiff val: " & yDiff)
+
+            If (yDiff >= 0 And xDiff >= 0) Then
+                If (yDiff > xDiff) Then
+                    ' Check if future move is open
+                    If (Cells(le_r(0) + 1, le_c(0)).Value <> wall) Then
+                        le_r(0) = le_r(0) + 1
+                    End If
+                Else
+                    If (Cells(le_r(0), le_c(0) + 1).Value <> wall) Then
+                        le_c(0) = le_c(0) + 1
+                    End If
+                End If
+            ElseIf (yDiff >= 0 And xDiff <= 0) Then
+                If (Abs(yDiff) > Abs(xDiff)) Then
+                    If (Cells(le_r(0) + 1, le_c(0)).Value <> wall) Then
+                        le_r(0) = le_r(0) + 1
+                    End If
+                Else
+                    If (Cells(le_r(0), le_c(0) - 1).Value <> wall) Then
+                        le_c(0) = le_c(0) - 1
+                    End If
+                End If
+            ElseIf (yDiff <= 0 And xDiff >= 0) Then
+                If (Abs(yDiff) > Abs(xDiff)) Then
+                    If (Cells(le_r(0) - 1, le_c(0)).Value <> wall) Then
+                        le_r(0) = le_r(0) - 1
+                    End If
+                Else
+                    If (Cells(le_r(0), le_c(0) + 1).Value <> wall) Then
+                        le_c(0) = le_c(0) + 1
+                    End If
+                End If
+            ElseIf (yDiff <= 0 And xDiff <= 0) Then
+                If (yDiff < xDiff) Then
+                    If (Cells(le_r(0) - 1, le_c(0)).Value <> Null) Then
+                        le_r(0) = le_r(0) - 1
+                    End If
+                Else
+                    If (Cells(le_r(0), le_c(0) - 1).Value <> Null) Then
+                        le_c(0) = le_c(0) - 1
+                    End If
+                End If
+            End If
+            If (xDiff = 0 And yDiff = 0) Then
+                Debug.Print("reduce player health")
+                health = health - 1
+                'Testing 1 hit for now
+                le_isDestroyed = True
+                Range("B38").Value = "The moth strikes! You feel a sharp pain as it disppates."
+                If mothTut = False Then
+                    MsgBox "OUCH!(-1 HP) I need something to stop these moths. That trap in my inventory might help!"
+                mothTut = True
+                End If
+            End If
         End If
     End If
-
 End Sub
 
 
 '------------------------------INTERACTION CHECKS----------------------------------------------
 Sub interact()
     'TODO Make function for each interaction check to make it look prettier
+    If Cells(r(0), c(0) - 1).Value = wall Or Cells(r(0), c(0) + 1).Value = wall Or Cells(r(0) + 1, c(0)).Value = wall Or Cells(r(0) - 1, c(0)).Value = wall Then
+        Range("B38").Value = "A hard sturdy wall. Looks impenetrable"
+    End If
+
+    If lightDataTut = False And level = 1 Then
+        MsgBox "Things look different here. They dont feel real. I feel like I can see numbers all around me"
+        lightDataTut = True
+    End If
 
     If Cells(r(0), c(0) - 1).Value = rock Or Cells(r(0), c(0) + 1).Value = rock Or Cells(r(0) + 1, c(0)).Value = rock Or Cells(r(0) - 1, c(0)).Value = rock Then
         If rockSearch = True Then
@@ -343,9 +429,17 @@ Sub interact()
 
     End If
     If Cells(r(0), c(0) - 1).Value = shop Or Cells(r(0), c(0) + 1).Value = shop Or Cells(r(0) + 1, c(0)).Value = shop Or Cells(r(0) - 1, c(0)).Value = shop Then
-        Range("B38").Value = "You find a shop but there is a painted sign that says OuT fOr LUnCh"
+        'Range("B38").Value = "You find a shop but there is a painted sign that says OuT fOr LUnCh"
         ' This is Joseph testing the shop for testing purposes, feel free to comment out the line for now
-        'UserForm1.Show
+        UserForm1.Show
+    End If
+
+    If Cells(r(0), c(0) - 1).Value = firefly Or Cells(r(0), c(0) + 1).Value = firefly Or Cells(r(0) + 1, c(0)).Value = firefly Or Cells(r(0) - 1, c(0)).Value = firefly Then
+        MsgBox "A firefly! If I get closer I think I can catch it"
+    End If
+
+    If Cells(r(0), c(0) - 1).Value = trap Or Cells(r(0), c(0) + 1).Value = trap Or Cells(r(0) + 1, c(0)).Value = trap Or Cells(r(0) - 1, c(0)).Value = trap Then
+        MsgBox "This flower looks different than the others. I think I might be able to step over it"
     End If
 
     If Cells(r(0), c(0) - 1).Value = puddle Or Cells(r(0), c(0) + 1).Value = puddle Or Cells(r(0) + 1, c(0)).Value = puddle Or Cells(r(0) - 1, c(0)).Value = puddle Then
@@ -374,16 +468,18 @@ Sub interact()
     End If
     If Cells(r(0), c(0) - 1).Value = gate Or Cells(r(0), c(0) + 1).Value = gate Or Cells(r(0) + 1, c(0)).Value = gate Or Cells(r(0) - 1, c(0)).Value = gate Then
         If authorityLevel = 0 Then
+            If doorsTut = False Then
+                MsgBox "I need to open these some how. I can see the exit on the other side"
+            End If
             Range("B38").Value = "You find what seems like a gate. It has the same glow as the things around you but does not give it off."
         End If
         If authorityLevel = 1 Then
             Range("B38").Value = "The gate has lost its glow and is swung open"
         End If
     End If
-    If Cells(r(0), c(0) - 1).Value = wall Or Cells(r(0), c(0) + 1).Value = wall Or Cells(r(0) + 1, c(0)).Value = wall Or Cells(r(0) - 1, c(0)).Value = wall Then
-        Range("B38").Value = "A hard sturdy wall. Looks impenetrable"
-    End If
+
     RenderImages()
+    ShowPlayer()
 End Sub
 
 Sub SearchRefresh()
@@ -452,12 +548,18 @@ Sub Collide()
     If Cells(r(0), c(0)).Value = trap And vis > 0 Then
         vis = vis - 1
         Cells(r(0), c(0)).Value = Null
-        Range("B38").Value = "YOU STEPPED ON A TRAP: Vision level decreased"
+        MsgBox "The flower saps your USB energy. Vision Decreased"
     End If
 
 
 
     If Cells(r(0), c(0)).Value = escape Then
+        If level = 2 Then
+            MsgBox "This has to be it"
+            level = level + 1
+            LoadLevel(level)
+        End If
+
         If level = 1 Then
             MsgBox "I have to be getting close to the exit"
             level = level + 1
@@ -486,7 +588,7 @@ Sub Collide()
         Cells(r(0), c(0)).Value = Null
         MsgBox "Reading USB ... Light Program Installed ..."
         MsgBox "Huh?! I can see! From a USB? How is that possible"
-        MsgBox "Are those gates?? what is going on here?"
+        MsgBox "Are those gates?? What is going on here?"
         MsgBox "Woah those rocks over there are glowing maybe I should check them out"
 
 
@@ -520,9 +622,20 @@ Function AuthorityLevelCheck(level As Integer)
             authorityLevel = 1
         End If
     End If
+    If level = 2 Then
+        If lightData >= 150 And spaceDiscovered >= 50 And isHalfway = False Then
+            MsgBox "The USB device in your possesion whirls. A bar on the face of the device is half way full. More Light Data Needed"
+            isHalfway = True
+        End If
+        If lightData >= 175 And spaceDiscovered >= 100 And authorityLevel = 0 Then
+            MsgBox "The USB device in your possesion whirls again. It flashes with the words AUTHORITY LEVEL INCREASED"
+            MsgBox "I think I heard a gate open up somewhere"
+            authorityLevel = 1
+        End If
+    End If
 End Function
 Sub GameOverCheck()
-    If vis = 0 And lightDataTut = True Then
+    If vis = 0 And level > 0 Then
         MsgBox "USB Depleted: GAME OVER"
         StartGame()
     End If
@@ -545,7 +658,7 @@ Sub RenderImages()
     Set levelRng = Range("A1:AR36")
 
     For Each cell In levelRng
-        If cell.Value = firefly Then
+        If cell.Value = firefly And level = 0 Then
             Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\firefly.png"
             Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
                     
@@ -553,6 +666,18 @@ Sub RenderImages()
             Image.Left = cell.Left
             Image.ShapeRange.Height = gameHeight
             Image.ShapeRange.Width = gameHeight
+
+        End If
+        If cell.Value = firefly Then
+            If level = 1 Or level = 2 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\firefly2.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                        
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
 
         End If
 
@@ -576,12 +701,58 @@ Sub RenderImages()
 
     For Each cell In visRng
         If cell.Value = firefly Then
-            cell.Font.ColorIndex = gameHeight - 10
+            cell.Font.ColorIndex = 50
         End If
 
-        If cell.Value = footprints Then
-            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\fpDown.png"
+        '        If cell.Value = footprints Then
+        '            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\fpDown.png"
+        '            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+        '            cell.Font.ColorIndex = 50
+        '            Image.Top = cell.Top
+        '            Image.Left = cell.Left
+        '            Image.ShapeRange.Height = gameHeight
+        '            Image.ShapeRange.Width = gameHeight + 5
+        '
+        '        End If
+
+        If cell.Value = trap Then
+            If level = 0 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\trap.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                        
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight + 5
+            End If
+            If level = 1 Or level = 2 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\trap2.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                        
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight + 5
+            End If
+            If level = 3 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 3\trap3.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                        
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight + 5
+            End If
+
+        End If
+
+        If cell.Value = wall Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\wall.png"
             Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
             cell.Font.ColorIndex = 50
             Image.Top = cell.Top
             Image.Left = cell.Left
@@ -590,54 +761,116 @@ Sub RenderImages()
 
         End If
 
-        If cell.Value = trap Then
-            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\trap.png"
-            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
-                    
-            Image.Top = cell.Top
-            Image.Left = cell.Left
-            Image.ShapeRange.Height = gameHeight
-            Image.ShapeRange.Width = gameHeight + 5
-
-        End If
-
-        If cell.Value = wall Then
-            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\wall.png"
-            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
-                    
-            Image.Top = cell.Top
-            Image.Left = cell.Left
-            Image.ShapeRange.Height = gameHeight
-            Image.ShapeRange.Width = gameHeight + 5
-
-        End If
-
-        If cell.Value = rock And rockSearch = False Then
+        If cell.Value = rock And rockSearch = False And level = 0 Then
             Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\rockLight.png"
             Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
                     
+            cell.Font.ColorIndex = 50
             Image.Top = cell.Top
             Image.Left = cell.Left
             Image.ShapeRange.Height = gameHeight
             Image.ShapeRange.Width = gameHeight + 5
 
         End If
+        If cell.Value = rock And rockSearch = False Then
+            If level = 1 Or level = 2 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\rock2Light.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight + 5
+            End If
+            If level = 3 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\rock2Light.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight + 5
+            End If
 
-        If cell.Value = rock And rockSearch = True Then
+        End If
+
+        If cell.Value = rock And rockSearch = True And level = 0 Then
             Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\rock.png"
             Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
-                    
+            
+            cell.Font.ColorIndex = 50
             Image.Top = cell.Top
             Image.Left = cell.Left
             Image.ShapeRange.Height = gameHeight
             Image.ShapeRange.Width = gameHeight + 5
 
         End If
+        If cell.Value = rock And rockSearch = True Then
+            If level = 1 Or level = 2 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\rock2.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight + 5
+            End If
+            If level = 3 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 3\rock3.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight + 5
+            End If
 
-        If cell.Value = shrub And shrubSearch = False Then
+        End If
+
+        If cell.Value = shrub And shrubSearch = False And level = 0 Then
             Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\shrubLight.png"
             Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
-                    
+            
+            cell.Font.ColorIndex = 50
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
+
+        End If
+        If cell.Value = shrub And shrubSearch = False Then
+            If level = 1 Or level = 2 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\shrub2Light.PNG"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
+            If level = 3 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 3\shrub3Light.PNG"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
+
+        End If
+
+        If cell.Value = shrub And shrubSearch = True And level = 0 Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\shrub.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+            
+            cell.Font.ColorIndex = 50
             Image.Top = cell.Top
             Image.Left = cell.Left
             Image.ShapeRange.Height = gameHeight
@@ -645,80 +878,175 @@ Sub RenderImages()
 
         End If
         If cell.Value = shrub And shrubSearch = True Then
-            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\shrub.png"
-            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
-                    
-            Image.Top = cell.Top
-            Image.Left = cell.Left
-            Image.ShapeRange.Height = gameHeight
-            Image.ShapeRange.Width = gameHeight
+            If level = 1 Or level = 2 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\shrub2.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
+            If level = 3 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 3\shrub3.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
 
         End If
 
 
         If cell.Value = flower And flowerSearch = False Then
-            'cell.Font.ColorIndex = 15
-            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\flowerLight.png"
-            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
-                    
-            Image.Top = cell.Top
-            Image.Left = cell.Left
-            Image.ShapeRange.Height = gameHeight
-            Image.ShapeRange.Width = gameHeight
+            If level = 1 Or level = 2 Then
+                'cell.Font.ColorIndex = 15
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\flower2Light.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
+            If level = 3 Then
+                'cell.Font.ColorIndex = 15
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 3\flower3Light.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
 
         End If
         If cell.Value = flower And flowerSearch = True Then
-            cell.Font.ColorIndex = 15
-            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\flower.png"
-            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
-                    
-            Image.Top = cell.Top
-            Image.Left = cell.Left
-            Image.ShapeRange.Height = gameHeight
-            Image.ShapeRange.Width = gameHeight
+            If level = 1 Or level = 2 Then
+                cell.Font.ColorIndex = 15
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\flower2.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
+            If level = 3 Then
+                cell.Font.ColorIndex = 15
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 3\flower3.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
 
         End If
 
         If cell.Value = mushroom And mushroomSearch = False Then
-            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\mushroomLight.png"
-            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
-                    
-            Image.Top = cell.Top
-            Image.Left = cell.Left
-            Image.ShapeRange.Height = gameHeight
-            Image.ShapeRange.Width = gameHeight
+            If level = 1 Or level = 2 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\mushroom2Light.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
+            If level = 3 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 3\mushroom3Light.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
+
 
         End If
         If cell.Value = mushroom And mushroomSearch = True Then
-            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\mushroom.png"
-            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
-                    
-            Image.Top = cell.Top
-            Image.Left = cell.Left
-            Image.ShapeRange.Height = gameHeight
-            Image.ShapeRange.Width = gameHeight
+            If level = 1 Or level = 2 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\mushroom2.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
+            If level = 3 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 3\mushroom3.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
 
         End If
 
 
         If cell.Value = puddle And puddleSearch = False Then
-            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\puddleLight.png"
-            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
-                    
-            Image.Top = cell.Top
-            Image.Left = cell.Left
-            Image.ShapeRange.Height = gameHeight
-            Image.ShapeRange.Width = gameHeight
+            If level = 1 Or level = 2 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\puddle2Light.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
+            If level = 3 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 3\puddle3Light.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
+
 
         End If
         If cell.Value = puddle And puddleSearch = True Then
-            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\puddle.png"
-            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
-                    
-            Image.Top = cell.Top
-            Image.Left = cell.Left
-            Image.ShapeRange.Height = gameHeight
-            Image.ShapeRange.Width = gameHeight
+            If level = 1 Or level = 2 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\puddle2.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
+            If level = 3 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 3\puddle3.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                
+                cell.Font.ColorIndex = 50
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
 
         End If
 
@@ -824,30 +1152,31 @@ Sub RemoveInventory(invValue As Integer)
         End If
     Next i
 End Sub
-'----------------------------------------------LOADING LEVELS-----------------------------------------
+'----------------------------------------------LOAIDNG LEVELS-----------------------------------------
 Function LoadLevel(level As Integer)
     'Clear All Values
-    If level = 0 Then
-        Cells.Clear
-    End If
+
+    Range("A1:AR36").Clear
+
     Dim pic As Picture
     For Each pic In Sheets("Sheet1").Pictures
         pic.Delete
     Next pic
 
 
-
-    'Set Bound of Level
-    Range("E5:AN32").Interior.Color = vbBlack
-    Range("E5:AN32").Font.Size = (gameHeight - 5)
-    Range("A1:AR4").Value = wall
-    Range("AO5:AR36").Value = wall
-    Range("A33:AN36").Value = wall
-    Range("A5:D32").Value = wall
-    Range("A1:AR4").Interior.Color = vbBlack
-    Range("AO5:AR36").Interior.Color = vbBlack
-    Range("A33:AN36").Interior.Color = vbBlack
-    Range("A5:D32").Interior.Color = vbBlack
+    If level < 3 Then
+        'Set Bound of Level
+        Range("E5:AN32").Interior.Color = vbBlack
+        Range("A1:AR4").Value = wall
+        Range("AO5:AR36").Value = wall
+        Range("A33:AN36").Value = wall
+        Range("A5:D32").Value = wall
+        Range("A1:AR4").Interior.Color = vbBlack
+        Range("AO5:AR36").Interior.Color = vbBlack
+        Range("A33:AN36").Interior.Color = vbBlack
+        Range("A5:D32").Interior.Color = vbBlack
+    End If
+    Range("A1:AN39").Font.Size = (gameHeight - 5)
 
     'Envir searching variables
     isHalfway = False
@@ -959,6 +1288,7 @@ Function LoadLevel(level As Integer)
 
     If level = 1 Then
 
+
         'Redraw UI
         AddUI()
         UpdateUI()
@@ -969,10 +1299,16 @@ Function LoadLevel(level As Integer)
         c(0) = 9
 
         'Enemy
-        'le_r(0) = 16: le_c(0) = 16
-        'le_isRevealed = False
+        le_r(0) = 29 : le_c(0) = 16
+        '        le_r(0) = 21: le_c(0) = 17
+        '        le_r(0) = 21: le_c(0) = 17
+        '        le_r(0) = 10: le_c(0) = 25
+        '        le_r(0) = 21: le_c(0) = 17
+        '        le_r(0) = 10: le_c(0) = 5
+        '        le_r(0) = 19: le_c(0) = 7
+        le_isRevealed = False
 
-
+        lightDataTut = False
 
         'Map Blocking
         Range("K31") = wall
@@ -1110,10 +1446,10 @@ Function LoadLevel(level As Integer)
         le_isRevealed = False
         le_isDestoryed = False
 
-        Range("G7:AB7") = wall   'top wall
-        Range("G8:G28") = wall  'left wall
-        Range("AB7:AB28") = wall 'right wall
-        Range("H28:X28") = wall 'bottom wall
+        Range("G5:AB7") = wall   'top wall
+        Range("D8:G28") = wall  'left wall
+        Range("AB7:AE28") = wall 'right wall
+        Range("H28:X31") = wall 'bottom wall
         Range("AA27") = wall
 
         Range("I7:K8") = wall
@@ -1142,7 +1478,7 @@ Function LoadLevel(level As Integer)
         Range("U16") = wall
         Range("Y16") = wall
         Range("K17") = wall
-        Range("M17:N:17") = wall
+        Range("M17:N17") = wall
         Range("Z17") = wall
         Range("S18") = wall
         Range("J19") = wall
@@ -1240,6 +1576,10 @@ Function LoadLevel(level As Integer)
         'Shop
         Range("S10") = shop
 
+        Range("Y28:AA28") = gate
+        Range("Y29:AA29") = escape
+
+
         ShowVis()
         ShowPlayer()
         ShowEnemy()
@@ -1247,17 +1587,20 @@ Function LoadLevel(level As Integer)
 
     'Boss Level!
     If level = 3 Then
+        Range("A1:AR37").Interior.Color = vbBlack
         'Player pos
-        r(0) = 35 : c(0) = 36 'AJ35
+        r(0) = 33 : c(0) = 38  'AJ35
 
         'Enemies (6)
-        le_r(0) = 24 : le_c(0) = 20 'T24
+        le_r(0) = 24 : le_c(0) = 20  'T24
         le_isRevealed = False
         le_isDestroyed = False
         'Y29, Q33, H35, Z34, AM35
 
         'Shop
         Range("AC25") = shop
+        Range("W7:X7") = gate
+        Range("W6:X6") = escape
 
         Range("G7:V7") = wall   'top wall
         Range("Y7:AN7") = wall
@@ -1346,8 +1689,8 @@ Function LoadLevel(level As Integer)
         ShowEnemy()
     End If
 
-End Function
 
+End Function
 
 
 

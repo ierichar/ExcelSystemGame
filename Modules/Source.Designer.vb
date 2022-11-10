@@ -94,43 +94,44 @@ Sub StartGame()
 
     'loads in the level 1 values
     level = 0
-    LoadLevel (0)
+    LoadLevel(level)
 
     'Player Variables
     ReDim r(1)
     ReDim c(1)
     r(0) = 20
     c(0) = 5
-    rinc = 0: cinc = 0
+    rinc = 0 : cinc = 0
     health = 3
     vis = 0
     authorityLevel = 0
+    lightData = 0
 
     'Enemy Values
     ReDim le_r(1)
     ReDim le_c(1)
-    le_r(0) = 16: le_c(0) = 16
-    le_rinc = 0: le_cinc = 0
+    le_r(0) = 16 : le_c(0) = 16
+    le_rinc = 0 : le_cinc = 0
     le_isRevealed = False
     le_isDestroyed = False
 
     'Player Trap Values
     ReDim pt_r(1)
     ReDim pt_c(1)
-    pt_r(0) = 0: pt_c(0) = 0
+    pt_r(0) = 0 : pt_c(0) = 0
     pt_isPlaced = False
 
     'bind keys and render player
     bindKeys
-    ShowVis
-    ShowPlayer
-    ShowEnemy
-    AddUI
-    
-    'set shop values and give player a trap
+    ShowVis()
+    ShowPlayer()
+    ShowEnemy()
+    AddUI()
+
     Range("AU28").Value = ptrap
     potionCount = 3
     potionBought = False
+
 End Sub
 
 '----------------------------SHOW PLAYER AND VISION-------------------------------------------------
@@ -138,18 +139,18 @@ Sub ShowPlayer()
     Cells(r(0), c(0)).Interior.Color = vbRed
 End Sub
 Sub ShowEnemy()
-    'Debug.Print ("revealed = " & le_isRevealed & ", destroyed = " & le_isDestroyed)
+    Debug.Print("revealed = " & le_isRevealed & ", destroyed = " & le_isDestroyed)
     If (le_isRevealed = True And le_isDestroyed = False) Then
         Cells(le_r(0), le_c(0)).Interior.Color = vbGreen
         'ElseIf (le_isRevealed = True And le_isDestroyed = False) Then
         'Cells(le_r(0), le_c(0)).Interior.Color = vbGray
-    Else: Cells(le_r(0), le_c(0)).Interior.Color = vbBlack
+    Else : Cells(le_r(0), le_c(0)).Interior.Color = vbBlack
     End If
 End Sub
 
 '=================================ShowVis=====================================
 Sub ShowVis()
-    Range(Cells(r(0) - vis, c(0) - vis), Cells(r(0) + vis, c(0) + vis)).Interior.ColorIndex = 15
+    Range(Cells(r(0) - vis, c(0) - vis), Cells(r(0) + vis, c(0) + vis)).Interior.ColorIndex = 50
 End Sub
 
 '--------------------------UPDATE AND MOVE PLAYER----------------------------------------------------
@@ -157,7 +158,7 @@ Sub MovePlayer()
     ' if the player moves then run this
     If rinc <> 0 Or cinc <> 0 Then
         'sets past position to vision color
-        Cells(r(0), c(0)).Interior.ColorIndex = 15
+        Cells(r(0), c(0)).Interior.ColorIndex = 50
 
         'footprint placed and spaceDiscovered incremented
         If Cells(r(0), c(0)).Value <> footprints Then
@@ -170,7 +171,7 @@ Sub MovePlayer()
 
 
         'if the cell you are moving to is black or the vision color then run
-        If (Cells(r(0) + rinc, c(0) + cinc).Interior.Color = vbBlack Or Cells(r(0) + rinc, c(0) + cinc).Interior.ColorIndex = 15) Then
+        If (Cells(r(0) + rinc, c(0) + cinc).Interior.Color = vbBlack Or Cells(r(0) + rinc, c(0) + cinc).Interior.ColorIndex = 50) Then
             'collision  condition
             If (Cells(r(0) + rinc, c(0) + cinc).Value >= 9 Or Cells(r(0) + rinc, c(0) + cinc).Value = 0) Then
                 ' permission condition
@@ -195,30 +196,30 @@ Sub MovePlayer()
         End If
 
         'updating functions
-        Collide
-        ShowVis
-        ShowPlayer
-        ShowEnemy
-        MoveEnemy
-        UpdateUI
-        AuthorityLevelCheck (level)
-        SearchRefresh
-        RenderImages
-        ImgToUI
+        Collide()
+        ShowVis()
+        ShowPlayer()
+        ShowEnemy()
+        MoveEnemy()
+        UpdateUI()
+        AuthorityLevelCheck(level)
+        SearchRefresh()
+        RenderImages()
+        ImgToUI()
     End If
 End Sub
 
 '==================RevealEnemy===============
 'Pre: r(0), c(0), le_r(0), le_r(0), vis
 Function RevealEnemy()
-    'Debug.Print ("Checking reveal...")
+    Debug.Print("Checking reveal...")
     If (Abs(r(0) - le_r(0)) <= vis) And (Abs(c(0) - le_c(0)) <= vis) Then
         le_isRevealed = True
         If (le_isDestroyed = False) Then
             Range("B38").Value = "A light-hungry moth has spotted you! Run away or trap it!"
         End If
         RevealEnemy = True
-    Else: le_isRevealed = False
+    Else : le_isRevealed = False
         If (le_isDestroyed = False) Then
             Range("B38").Value = "The moth loses you in the darkness."
         End If
@@ -229,7 +230,7 @@ End Function
 '==================MoveEnemy=================
 'Pre: r(0), c(0), le_r(0), le_r(0)
 Sub MoveEnemy()
-    'Debug.Print ("Moving enemy...")
+    Debug.Print("Moving enemy...")
     If (Cells(le_r(0), le_c(0)).Value = 16) Then
         le_isDestroyed = True
     End If
@@ -239,8 +240,8 @@ Sub MoveEnemy()
 
         yDiff = r(0) - le_r(0)
         xDiff = c(0) - le_c(0)
-        'Debug.Print ("xDiff val: " & xDiff)
-        'Debug.Print ("yDiff val: " & yDiff)
+        Debug.Print("xDiff val: " & xDiff)
+        Debug.Print("yDiff val: " & yDiff)
 
         If (yDiff >= 0 And xDiff >= 0) Then
             If (yDiff > xDiff) Then
@@ -285,7 +286,7 @@ Sub MoveEnemy()
             End If
         End If
         If (xDiff = 0 And yDiff = 0) Then
-            'Debug.Print ("reduce player health")
+            Debug.Print("reduce player health")
             health = health - 1
             'Testing 1 hit for now
             le_isDestroyed = True
@@ -344,7 +345,7 @@ Sub interact()
     If Cells(r(0), c(0) - 1).Value = shop Or Cells(r(0), c(0) + 1).Value = shop Or Cells(r(0) + 1, c(0)).Value = shop Or Cells(r(0) - 1, c(0)).Value = shop Then
         Range("B38").Value = "You find a shop but there is a painted sign that says OuT fOr LUnCh"
         ' This is Joseph testing the shop for testing purposes, feel free to comment out the line for now
-        UserForm1.Show
+        'UserForm1.Show
     End If
 
     If Cells(r(0), c(0) - 1).Value = puddle Or Cells(r(0), c(0) + 1).Value = puddle Or Cells(r(0) + 1, c(0)).Value = puddle Or Cells(r(0) - 1, c(0)).Value = puddle Then
@@ -367,6 +368,7 @@ Sub interact()
             Range("B38").Value = "You find a mushroom. The spots on the cap seem to be glowing and give off energy"
             lightData = lightData + 5
             Range("BB15").Value = lightData
+            mushroomSearch = True
 
         End If
     End If
@@ -381,7 +383,7 @@ Sub interact()
     If Cells(r(0), c(0) - 1).Value = wall Or Cells(r(0), c(0) + 1).Value = wall Or Cells(r(0) + 1, c(0)).Value = wall Or Cells(r(0) - 1, c(0)).Value = wall Then
         Range("B38").Value = "A hard sturdy wall. Looks impenetrable"
     End If
-    RenderImages
+    RenderImages()
 End Sub
 
 Sub SearchRefresh()
@@ -425,14 +427,13 @@ End Sub
 '-------------------------------Place Item-------------------------------------
 'Click on item in inventory, then press p to place it
 Sub placeItem()
-    'Debug.Print ("Placing item")
+    Debug.Print("Placing item")
     If (ActiveCell.Value = ptrap) Then
         Cells(r(0), c(0)).Value = ActiveCell.Value
         ActiveCell.Value = Null
     End If
 End Sub
-'-------------------------------Place Item-------------------------------------
-'Click on item in inventory, then press p to place it
+
 Sub usePotion()
     'Debug.Print ("Placing item")
     If (ActiveCell.Value = potion) Then
@@ -440,9 +441,9 @@ Sub usePotion()
             health = health + 1
             ActiveCell.Value = Null
         Else
-            MsgBox ("My health is full at the moment")
+            MsgBox("My health is full at the moment")
         End If
-    
+
     End If
 End Sub
 
@@ -454,12 +455,21 @@ Sub Collide()
         Range("B38").Value = "YOU STEPPED ON A TRAP: Vision level decreased"
     End If
 
+
+
     If Cells(r(0), c(0)).Value = escape Then
+        If level = 1 Then
+            MsgBox "I have to be getting close to the exit"
+            level = level + 1
+            LoadLevel(level)
+        End If
+
         If level = 0 Then
             MsgBox "This seems like the way out!"
             level = level + 1
-            LoadLevel (level)
+            LoadLevel(level)
         End If
+
     End If
 
     If Cells(r(0), c(0)).Value = firefly And vis < 3 Then
@@ -482,23 +492,45 @@ Sub Collide()
 
         Cells(r(0), c(0)).Font.Color = vbBlack
         usbFound = True
-        UpdateInventory (12)
+        UpdateInventory(12)
     End If
 End Sub
 
 Function AuthorityLevelCheck(level As Integer)
     If level = 0 Then
-        If lightData >= 20 And spaceDiscovered >= 60 And isHalfway = False Then
+        If lightData >= 20 And spaceDiscovered >= 50 And isHalfway = False Then
             MsgBox "The USB device in your possesion whirls. A bar on the face of the device is half way full. More Light Data Needed"
             isHalfway = True
         End If
-        If lightData >= 40 And spaceDiscovered >= 100 And authorityLevel = 0 Then
+        If lightData >= 30 And spaceDiscovered >= 100 And authorityLevel = 0 Then
+            MsgBox "The USB device in your possesion whirls again. It flashes with the words AUTHORITY LEVEL INCREASED"
+            MsgBox "I think I heard a gate open up somewhere"
+            authorityLevel = 1
+        End If
+    End If
+
+    If level = 1 Then
+        If lightData >= 75 And spaceDiscovered >= 60 And isHalfway = False Then
+            MsgBox "The USB device in your possesion whirls. A bar on the face of the device is half way full. More Light Data Needed"
+            isHalfway = True
+        End If
+        If lightData >= 125 And spaceDiscovered >= 100 And authorityLevel = 0 Then
             MsgBox "The USB device in your possesion whirls again. It flashes with the words AUTHORITY LEVEL INCREASED"
             MsgBox "I think I heard a gate open up somewhere"
             authorityLevel = 1
         End If
     End If
 End Function
+Sub GameOverCheck()
+    If vis = 0 And lightDataTut = True Then
+        MsgBox "USB Depleted: GAME OVER"
+        StartGame()
+    End If
+    If health = 0 Then
+        MsgBox "YOU DIED: GAME OVER"
+        StartGame()
+    End If
+End Sub
 Sub RenderImages()
 
     Dim visRng As Range
@@ -534,11 +566,28 @@ Sub RenderImages()
             Image.ShapeRange.Width = gameHeight
 
         End If
+
+        If cell.Value = footprints Then
+            cell.Font.Color = vbBlack
+        End If
+
+
     Next cell
 
     For Each cell In visRng
         If cell.Value = firefly Then
             cell.Font.ColorIndex = gameHeight - 10
+        End If
+
+        If cell.Value = footprints Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\footprintDown.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+            cell.Font.ColorIndex = 50
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight + 5
+
         End If
 
         If cell.Value = trap Then
@@ -608,7 +657,7 @@ Sub RenderImages()
 
 
         If cell.Value = flower And flowerSearch = False Then
-            cell.Font.ColorIndex = 15
+            'cell.Font.ColorIndex = 15
             Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\flowerLight.png"
             Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
                     
@@ -699,7 +748,7 @@ Sub AddUI()
     ' Item inventory Area
     Range("AU28", "BC33").Interior.Color = RGB(245, 245, 220)
     'Player Traps
-    
+
 
     ' Currency
     Range("AY13").Value = "Bits:"
@@ -732,8 +781,8 @@ Sub UpdateUI()
         Range("AY9").Interior.Color = RGB(255, 255, 0)
     End If
     'If
-            
-    
+
+
 End Sub
 
 Sub UpdateInventory(invValue As Integer)
@@ -821,10 +870,10 @@ Function LoadLevel(level As Integer)
 
     'Level Progression
     spaceDiscovered = 0
+    authorityLevel = 0
 
 
     If level = 0 Then
-        'Cells.Clear
         MsgBox "Where am I? What am I doing here? Why can’t I see anything?"
         MsgBox "I should walk around and see what I can find."
         MsgBox "I think there is something on the ground in front of me, let me head over and pick it up"
@@ -909,52 +958,151 @@ Function LoadLevel(level As Integer)
     End If
 
     If level = 1 Then
-        'Range("A1:AR38").Clear
+
         'Redraw UI
-        AddUI
-        UpdateUI
-        'UpdateInventory (17)
+        AddUI()
+        UpdateUI()
+        UpdateInventory()
 
         'Player Pos
-        r(0) = 10
-        c(0) = 10
+        r(0) = 31
+        c(0) = 9
 
         'Enemy
-        le_r(0) = 16: le_c(0) = 16
-        le_isRevealed = False
+        'le_r(0) = 16: le_c(0) = 16
+        'le_isRevealed = False
 
 
 
         'Map Blocking
-        Range("AM5").Value = escape
-        Range("AJ7").Value = trap
-        Range("R13").Value = firefly
-        Range("R13").Font.ColorIndex = 6
-        'Range("AA26:AC26").Value = gate
-        'Range("Z26:Z32").Value = wall
-        'Range("AD26:AD32").Value = wall
-        Range("AB28").Value = trap
-        Range("J8").Value = rock
-        Range("AG29").Value = puddle
-        Range("F9").Value = mushroom
-        Range("P11").Value = shrub
-        Range("G20").Value = flower
-        Range("AG20").Value = shop
-        Range("F8").Value = firefly
-        Range("F8").Font.ColorIndex = 6
+        Range("K31") = wall
+        Range("J29") = wall
+        Range("L32") = wall
+        Range("J30") = wall
+        Range("H28:I28") = wall
+        Range("E25:G25") = wall
+        Range("F28") = wall
+        Range("K23") = wall
+        Range("L26") = wall
+        Range("M23:M25") = wall
+        Range("N21:N23") = wall
+        Range("I24:J24") = wall
+        Range("K21") = wall
+        Range("I20") = wall
+        Range("F23") = wall
+        Range("K17") = wall
+        Range("J18:J19") = wall
+        Range("F23") = wall
+        Range("F19") = wall
+        Range("L16:M16") = wall
+        Range("N17:N18") = wall
+        Range("O22:P22") = wall
+        Range("Q18:Q20") = wall
+        Range("R21") = wall
+        Range("G17") = wall
+        Range("H16") = wall
+        Range("S19:S20") = wall
+        Range("O14:P14") = wall
+        Range("E15:E16") = wall
+        Range("E5:AN9") = wall
+        Range("J10:J11") = wall
+        Range("M10:M11") = wall
+        Range("E12:F12") = wall
+        Range("R17:S17") = wall
+        Range("R16") = wall
+        Range("X14") = wall
+        Range("X16") = wall
+        Range("Y18") = wall
+        Range("V13:W13") = wall
+        Range("X19:X20") = wall
+        Range("Z10:AF32") = wall
+        Range("W21") = wall
+        Range("U22:V22") = wall
+        Range("T23") = wall
+        Range("X24") = wall
+        Range("X23") = wall
+        Range("P25:Q25") = wall
+        Range("L28:M28") = wall
+        Range("K28") = wall
+        Range("N29") = wall
+        Range("M30") = wall
+        Range("S26") = wall
+        Range("U26") = wall
+        Range("U29") = wall
+        Range("P28") = wall
+        Range("O28") = wall
+        Range("Y26") = wall
+        Range("X27:X28") = wall
+
+        Range("K11:L11") = gate
+        Range("K10:L10") = escape
+
+
+        Range("G32") = rock
+        Range("H20") = rock
+        Range("G21") = rock
+        Range("E19") = rock
+        Range("N14") = rock
+        Range("G18") = rock
+        Range("Q26") = rock
+
+        Range("F32") = shrub
+        Range("F22") = shrub
+        Range("T14") = shrub
+        Range("F22") = shrub
+        Range("U13") = shrub
+        Range("W16") = shrub
+        Range("U27") = shrub
+        Range("R30") = shrub
+
+        Range("E32") = puddle
+        Range("L14") = puddle
+        Range("G13") = puddle
+        Range("X15") = puddle
+        Range("T26") = puddle
+        Range("T29") = puddle
+        Range("S30") = puddle
+
+
+        Range("E28") = flower
+        Range("H25") = flower
+        Range("G20") = flower
+        Range("K14") = flower
+        Range("T17") = flower
+        Range("U28") = flower
+
+        Range("X13") = mushroom
+        Range("W14") = mushroom
+        Range("W17") = mushroom
+        Range("Q29") = mushroom
+        Range("Y27") = mushroom
+
+        Range("G28") = trap
+        Range("I15") = trap
+        Range("E17") = trap
+        Range("X21") = trap
+        Range("R24") = trap
+        Range("W32") = trap
+
+        Range("V19") = shop
+
+        Range("R20") = firefly
+        Range("E18") = firefly
+        Range("Y19") = firefly
+        Range("K29") = firefly
+
+
         Range("B38").Font.Size = gameHeight
         Range("BB15").Font.Size = (gameHeight - 10)
 
-        ShowVis
-        ShowPlayer
-        ShowEnemy
+        ShowVis()
+        ShowPlayer()
+        ShowEnemy()
 
     End If
 
 
 End Function
-
-
 
 
 

@@ -25,6 +25,7 @@ Public usb As Integer
 Public footprints As String
 Public potion As Integer
 Public potionCount As Integer
+Public mothman As Integer
 
 Public rockSearch As Boolean
 Public shrubSearch As Boolean
@@ -87,6 +88,7 @@ Sub StartGame()
     usb = 12
     ptrap = 16 'May need to use fill tracking
     potion = 17
+    mothman = 18
 
     ' Changing states
     gate = 13
@@ -658,6 +660,18 @@ Sub RenderImages()
     Set levelRng = Range("A1:AR36")
 
     For Each cell In levelRng
+        If cell.Value = mothman Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\mothman.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = gameHeight + 200
+            Image.ShapeRange.Width = gameHeight + 200
+
+        End If
+
+
         If cell.Value = firefly And level = 0 Then
             Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\firefly.png"
             Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
@@ -681,6 +695,15 @@ Sub RenderImages()
         If cell.Value = firefly Then
             If level = 1 Or level = 2 Then
                 Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\firefly2.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                        
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight
+            End If
+            If level = 3 Then
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 3\firefly3.png"
                 Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
                         
                 Image.Top = cell.Top
@@ -712,6 +735,16 @@ Sub RenderImages()
     For Each cell In visRng
         If cell.Value = firefly Then
             cell.Font.ColorIndex = 50
+        End If
+        If cell.Value = ptrap Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\setTrap.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = gameHeight + 200
+            Image.ShapeRange.Width = gameHeight + 200
+
         End If
 
         '        If cell.Value = footprints Then
@@ -1628,7 +1661,27 @@ Function LoadLevel(level As Integer)
         Range("Y7:AN7") = wall
         Range("G8:G36") = wall  'left wall
         Range("AN8:AN36") = wall 'right wall
-        Range("H36:AN35") = wall 'bottom wall
+        Range("H36:AN36") = wall 'bottom wall
+        Range("AI30:AM30") = wall
+        Range("AI27:AI29") = wall
+        Range("AF27:AH27") = wall
+        Range("AF23:Af26") = wall
+        Range("Y23:AE23") = wall
+        Range("O23:V23") = wall
+        Range("O24:O27") = wall
+        Range("L27:N27") = wall
+        Range("L28:L30") = wall
+        Range("H30:K30") = wall
+        Range("T18:AA18") = wall
+        Range("S9:S18") = wall
+        Range("T9:AA9") = wall
+        Range("AB9:AB18") = wall
+
+
+
+
+
+
 
         'Traps
         Range("P25:R25") = trap
@@ -1705,6 +1758,8 @@ Function LoadLevel(level As Integer)
         Range("K33") = firefly
         Range("W31") = firefly
         Range("AG30") = firefly
+
+        Range("U10") = mothman
 
         ShowVis()
         ShowPlayer()

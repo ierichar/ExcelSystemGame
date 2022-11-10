@@ -96,29 +96,29 @@ Sub StartGame()
     lightDataTut = False
 
 
-    ReDim r(1)
-    ReDim c(1)
 
 
-    ReDim le_r(1)
-    ReDim le_c(1)
+
+
 
     'loads in the level 1 values
-    level = 3
-    LoadLevel(3)
+    level = 0
+    LoadLevel(level)
 
     'Player Variables
-
-    'r(0) = 20
-    'c(0) = 5
+    ReDim r(1)
+    ReDim c(1)
+    r(0) = 20
+    c(0) = 5
     rinc = 0 : cinc = 0
     health = 3
-    vis = 3
+    vis = 0
     authorityLevel = 0
     lightData = 0
 
     'Enemy Values
-
+    ReDim le_r(1)
+    ReDim le_c(1)
     'le_r(0) = 16: le_c(0) = 16
     le_rinc = 0 : le_cinc = 0
     le_isRevealed = False
@@ -668,6 +668,16 @@ Sub RenderImages()
             Image.ShapeRange.Width = gameHeight
 
         End If
+        If cell.Value = gate Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\door.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight
+
+        End If
         If cell.Value = firefly Then
             If level = 1 Or level = 2 Then
                 Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\stage 2\firefly2.png"
@@ -751,6 +761,18 @@ Sub RenderImages()
 
         If cell.Value = wall Then
             Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\wall.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+            cell.Font.ColorIndex = 50
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight + 5
+
+        End If
+
+        If cell.Value = ptrap Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\setTrap.png"
             Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
                     
             cell.Font.ColorIndex = 50

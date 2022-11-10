@@ -4,8 +4,8 @@
     Application.OnKey "{UP}", "moveUp"
     Application.OnKey "{DOWN}", "moveDown"
     Application.OnKey "{RETURN}", "interact"
-    Application.OnKey "{INSERT}", "placeItem"
-    Application.OnKey "{BREAK}", "usePotion"
+    Application.OnKey "{TAB}", "placeItem"
+    Application.OnKey "{BS}", "usePotion"
 End Sub
 
 Sub moveLeft()
@@ -35,10 +35,5 @@ Sub freeKeys()
     Application.OnKey "UP"
     Application.OnKey "DOWN"
     Application.OnKey "RETURN"
-    Application.OnKey "INSERT"
+    Application.OnKey "TAB"
 End Sub
-
-
-
-
-

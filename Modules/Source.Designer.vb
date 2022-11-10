@@ -121,13 +121,13 @@ Sub StartGame()
 
     'loads in the level 1 values
     level = 0
-    LoadLevel(level)
+    LoadLevel (level)
 
     'Player Variables
 
     r(0) = 20
     c(0) = 5
-    rinc = 0 : cinc = 0
+    rinc = 0: cinc = 0
     health = 3
     vis = 0
     maxVis = 3
@@ -137,7 +137,7 @@ Sub StartGame()
     'Enemy Values
 
     'le_r(0) = 16: le_c(0) = 16
-    le_rinc = 0 : le_cinc = 0
+    le_rinc = 0: le_cinc = 0
     le_isRevealed = False
     le_isDestroyed = False
     mothTut = False
@@ -146,18 +146,18 @@ Sub StartGame()
 
     'Player Trap Values
 
-    pt_r(0) = 0 : pt_c(0) = 0
+    pt_r(0) = 0: pt_c(0) = 0
     pt_isPlaced = False
 
     'bind keys and render player
     bindKeys
-    ShowVis()
-    ShowEnemy()
-    AddUI()
-    ShowPlayer()
+    ShowVis
+    ShowEnemy
+    AddUI
+    ShowPlayer
 
     'Range("AU28").Value = ptrap
-    UpdateInventory(ptrap)
+    UpdateInventory (ptrap)
     potionCount = 3
     trapCount = 5
     potionBought = False
@@ -226,7 +226,7 @@ Sub ShowPlayer()
     'Cells(r(0), c(0)).Interior.Color = vbRed
 End Sub
 Sub ShowEnemy()
-    Debug.Print("revealed = " & le_isRevealed & ", destroyed = " & le_isDestroyed)
+    Debug.Print ("revealed = " & le_isRevealed & ", destroyed = " & le_isDestroyed)
     If level > 0 Then
         If (le_isRevealed = True And le_isDestroyed = False) Then
             Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\moth.png"
@@ -295,34 +295,34 @@ Sub MovePlayer()
         End If
         Range("A1:AR36").Font.Color = vbBlack
         'updating functions
-        Collide()
-        ShowVis()
+        Collide
+        ShowVis
 
 
-        UpdateUI()
-        AuthorityLevelCheck(level)
-        SearchRefresh()
-        RenderImages()
-        ImgToUI()
-        ShowEnemy()
-        MoveEnemy()
-        ShowPlayer()
-        GameOverCheck()
-        BossFight()
+        UpdateUI
+        AuthorityLevelCheck (level)
+        SearchRefresh
+        RenderImages
+        ImgToUI
+        ShowEnemy
+        MoveEnemy
+        ShowPlayer
+        GameOverCheck
+        BossFight
     End If
 End Sub
 
 '==================RevealEnemy===============
 'Pre: r(0), c(0), le_r(0), le_r(0), vis
 Function RevealEnemy()
-    Debug.Print("Checking reveal...")
+    Debug.Print ("Checking reveal...")
     If (Abs(r(0) - le_r(0)) <= vis) And (Abs(c(0) - le_c(0)) <= vis) Then
         le_isRevealed = True
         If (le_isDestroyed = False) Then
             Range("B38").Value = "A light-hungry moth has spotted you! Run away or trap it!"
         End If
         RevealEnemy = True
-    Else : le_isRevealed = False
+    Else: le_isRevealed = False
         If (le_isDestroyed = False) Then
             Range("B38").Value = "The moth loses you in the darkness."
         End If
@@ -333,7 +333,7 @@ End Function
 '==================MoveEnemy=================
 'Pre: r(0), c(0), le_r(0), le_r(0)
 Sub MoveEnemy()
-    Debug.Print("Moving enemy...")
+    Debug.Print ("Moving enemy...")
     If level > 0 Then
         If (Cells(le_r(0), le_c(0)).Value = 16) Then
             le_isDestroyed = True
@@ -344,8 +344,8 @@ Sub MoveEnemy()
 
             yDiff = r(0) - le_r(0)
             xDiff = c(0) - le_c(0)
-            Debug.Print("xDiff val: " & xDiff)
-            Debug.Print("yDiff val: " & yDiff)
+            Debug.Print ("xDiff val: " & xDiff)
+            Debug.Print ("yDiff val: " & yDiff)
 
             If (yDiff >= 0 And xDiff >= 0) Then
                 If (yDiff > xDiff) Then
@@ -390,7 +390,7 @@ Sub MoveEnemy()
                 End If
             End If
             If (xDiff = 0 And yDiff = 0) Then
-                Debug.Print("reduce player health")
+                Debug.Print ("reduce player health")
                 health = health - 1
                 'Testing 1 hit for now
                 le_isDestroyed = True
@@ -512,8 +512,9 @@ Sub interact()
         End If
     End If
 
-    RenderImages()
-    ShowPlayer()
+    RenderImages
+    ShowPlayer
+    
 End Sub
 
 Sub SearchRefresh()
@@ -565,6 +566,7 @@ Sub placeItem()
             Cells(r(0), c(0)).Value = ptrap
         End If
     Next cell
+    RemoveInventory (ptrap)
     '    Debug.Print ("Placing item")
     '    If (ActiveCell.Value = ptrap) Then
     '        Cells(r(0), c(0)).Value = ActiveCell.Value
@@ -574,15 +576,21 @@ End Sub
 
 Sub usePotion()
     'Debug.Print ("Placing item")
-    If (ActiveCell.Value = potion) Then
-        If health < 3 Then
-            health = health + 1
-            ActiveCell.Value = Null
-        Else
-            MsgBox("My health is full at the moment")
-        End If
-
+    Dim invRange As Range
+    Dim cell As Range
+        'Set invRange = Range(Cells(28, 47), Cells(33, 55))
+        'For Each cell In invRange
+            'If cell.Value = potion Then
+    If health < 3 Then
+        health = health + 1
+        RemoveInventory (potion)
+        'ActiveCell.Value = Null
+    ElseIf health = 3 Then
+        MsgBox ("My health is full at the moment")
     End If
+            'End If
+        'Next cell
+
 End Sub
 
 '--------------------------------PLAYER COLLISION IN CELL ----------------------------------------
@@ -598,24 +606,24 @@ Sub Collide()
     If Cells(r(0), c(0)).Value = escape Then
         If level = 3 Then
             MsgBox "I DID IT"
-            StartGame()
+            StartGame
         End If
         If level = 2 Then
             MsgBox "This has to be it"
             level = level + 1
-            LoadLevel(level)
+            LoadLevel (level)
         End If
 
         If level = 1 Then
             MsgBox "I have to be getting close to the exit"
             level = level + 1
-            LoadLevel(level)
+            LoadLevel (level)
         End If
 
         If level = 0 Then
             MsgBox "This seems like the way out!"
             level = level + 1
-            LoadLevel(level)
+            LoadLevel (level)
         End If
 
     End If
@@ -640,7 +648,7 @@ Sub Collide()
 
         Cells(r(0), c(0)).Font.Color = vbBlack
         usbFound = True
-        UpdateInventory(12)
+        UpdateInventory (12)
     End If
 End Sub
 
@@ -681,7 +689,7 @@ Function AuthorityLevelCheck(level As Integer)
     End If
     If level = 3 And bossMono = True Then
         If spaceDiscovered >= 50 And isHalfway = False And Range("U10").Value = mothman Then
-            MsgBox "There has to be some way to beat him. If I could just reach him"
+            MsgBox "There has to be some way to beat him. If I could just "
             isHalfway = True
         End If
         If spaceDiscovered >= 75 And authorityLevel = 0 And Range("U10").Value = mothman And firstHint = False Then
@@ -701,11 +709,11 @@ End Function
 Sub GameOverCheck()
     If vis = 0 And level > 0 Then
         MsgBox "USB Depleted: GAME OVER"
-        StartGame()
+        StartGame
     End If
     If health = 0 Then
         MsgBox "YOU DIED: GAME OVER"
-        StartGame()
+        StartGame
     End If
 End Sub
 Sub BossFight()
@@ -751,16 +759,17 @@ Sub RenderImages()
             Image.ShapeRange.Width = gameHeight + 200
 
         End If
+        
         If cell.Value = shop Then
-            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\lovelandfrog.png"
-            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
-                    
-            Image.Top = cell.Top
-            Image.Left = cell.Left
-            Image.ShapeRange.Height = gameHeight
-            Image.ShapeRange.Width = gameHeight + 5
-
-        End If
+                Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\lovelandfrog.png"
+                Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                        
+                Image.Top = cell.Top
+                Image.Left = cell.Left
+                Image.ShapeRange.Height = gameHeight
+                Image.ShapeRange.Width = gameHeight + 5
+    
+            End If
 
 
         If cell.Value = firefly And level = 0 Then
@@ -802,6 +811,7 @@ Sub RenderImages()
                 Image.ShapeRange.Height = gameHeight
                 Image.ShapeRange.Width = gameHeight
             End If
+            
 
         End If
 
@@ -1209,7 +1219,7 @@ End Sub
 '------------------------------------------UI ADDING AND UPDATING---------------------------------
 Sub AddUI()
     ' Health bar
-    Range("AT4", "bd34").Interior.Color = RGB(239, 222, 205)
+    Range("AT4", "bd34").Interior.Color = RGB(11, 218, 81)
     Range("AY4").Value = "Health:"
     Range("BA4").Value = health
     ' Batteries
@@ -1221,7 +1231,7 @@ Sub AddUI()
     Range("AZ11", "AZ7").Font.Size = (gameHeight - 5)
 
     ' Item inventory Area
-    Range("AU28", "BC33").Interior.Color = RGB(245, 245, 220)
+    Range("AU28", "BC33").Interior.Color = RGB(193, 225, 193)
     'Player Traps
 
 
@@ -1242,15 +1252,15 @@ Sub UpdateUI()
 
     ' Update visibility
     If vis = 0 Then
-        Range("AY11").Interior.Color = RGB(239, 222, 205)
+        Range("AY11").Interior.Color = RGB(11, 218, 81)
     End If
     If vis = 1 Then
         Range("AY11").Interior.Color = vbRed
-        Range("AY10").Interior.Color = RGB(239, 222, 205)
+        Range("AY10").Interior.Color = RGB(11, 218, 81)
     End If
     If vis = 2 Then
         Range("AY11", "AY10").Interior.Color = RGB(255, 165, 0)
-        Range("AY9").Interior.Color = RGB(239, 222, 205)
+        Range("AY9").Interior.Color = RGB(11, 218, 81)
     End If
     If vis = 3 Then
         Range("AY11", "AY10").Interior.Color = RGB(255, 255, 0)
@@ -1466,8 +1476,8 @@ Function LoadLevel(level As Integer)
 
 
         'Redraw UI
-        AddUI()
-        UpdateUI()
+        AddUI
+        UpdateUI
         'UpdateInventory
 
         'Player Pos
@@ -1475,7 +1485,7 @@ Function LoadLevel(level As Integer)
         c(0) = 9
 
         'Enemy
-        le_r(0) = 29 : le_c(0) = 16
+        le_r(0) = 29: le_c(0) = 16
         '        le_r(0) = 21: le_c(0) = 17
         '        le_r(0) = 21: le_c(0) = 17
         '        le_r(0) = 10: le_c(0) = 25
@@ -1607,18 +1617,18 @@ Function LoadLevel(level As Integer)
         Range("B38").Font.Size = gameHeight
         Range("BB15").Font.Size = (gameHeight - 10)
 
-        ShowVis()
-        ShowPlayer()
-        ShowEnemy()
+        ShowVis
+        ShowPlayer
+        ShowEnemy
 
     End If
 
     If level = 2 Then
         'Player pos
-        r(0) = 8 : c(0) = 12
+        r(0) = 8: c(0) = 12
 
         'Enemy pos and state
-        le_r(0) = 8 : le_c(0) = 8
+        le_r(0) = 8: le_c(0) = 8
         le_isRevealed = False
         le_isDestoryed = False
 
@@ -1756,19 +1766,19 @@ Function LoadLevel(level As Integer)
         Range("Y29:AA29") = escape
 
 
-        ShowVis()
-        ShowPlayer()
-        ShowEnemy()
+        ShowVis
+        ShowPlayer
+        ShowEnemy
     End If
 
     'Boss Level!
     If level = 3 Then
         Range("A1:AR37").Interior.Color = vbBlack
         'Player pos
-        r(0) = 33 : c(0) = 38    'AJ35
+        r(0) = 33: c(0) = 38     'AJ35
 
         'Enemies (6)
-        le_r(0) = 24 : le_c(0) = 20    'T24
+        le_r(0) = 24: le_c(0) = 20     'T24
         le_isRevealed = False
         le_isDestroyed = False
         'Y29, Q33, H35, Z34, AM35
@@ -1882,13 +1892,14 @@ Function LoadLevel(level As Integer)
 
         Range("U10") = mothman
 
-        ShowVis()
-        ShowPlayer()
-        ShowEnemy()
+        ShowVis
+        ShowPlayer
+        ShowEnemy
     End If
 
 
 End Function
+
 
 
 

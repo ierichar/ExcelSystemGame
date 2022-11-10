@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "UserForm1"
-   ClientHeight    =   8400.001
+   ClientHeight    =   7350
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   7515
@@ -27,6 +27,7 @@ Private Sub CommandButton1_Click()
                 lightData = lightData - 40
                 Range("BB15").Value = lightData
                 Range("AZ8").Value = 4
+                maxVis = 4
                 UpdateInventory (19)
                 ImgToUI
             End If
@@ -79,6 +80,7 @@ Private Sub CommandButton3_Click()
                 Range("BB15").Value = lightData
                 trapCount = trapCount - 1
                 UpdateInventory (16)
+                ImgToUI
             End If
         Else
             MsgBox ("Shopkeeper: I dunt got anymur! Ye bot the lust one!")

@@ -168,9 +168,8 @@ Sub StartGame()
     Range("BM17") = "CONTROLS"
     Range("BF19") = "Arrow Keys: Move"
     Range("BF20") = "Enter: Interact"
-    Range("BF22") = "Inventory: Click on item you want to use"
-    Range("BG23") = "Tab: Lays Trap Down"
-    Range("BG24") = "Caps Lock: Uses Health Potion"
+    Range("BF21") = "Tab: Lays Trap Down"
+    Range("BF22") = "Caps Lock: Uses Health Potion"
 
 
 End Sub
@@ -262,7 +261,7 @@ Sub MovePlayer()
 
         'footprint placed and spaceDiscovered incremented
         If Cells(r(0), c(0)).Value <> footprints Then
-            If (Cells(r(0), c(0)).Value <> ptrap Or Cells(r(0), c(0)).Value <> firefly) Then
+            If (Cells(r(0), c(0)).Value <> ptrap) Then
                 Cells(r(0), c(0)).Value = footprints
             End If
             spaceDiscovered = spaceDiscovered + 1
@@ -558,11 +557,19 @@ End Sub
 '-------------------------------Place Item-------------------------------------
 'Click on item in inventory, then press p to place it
 Sub placeItem()
-    Debug.Print("Placing item")
-    If (ActiveCell.Value = ptrap) Then
-        Cells(r(0), c(0)).Value = ActiveCell.Value
-        ActiveCell.Value = Null
-    End If
+    Dim invRange As Range
+    Dim cell As Range
+    Set invRange = Range(Cells(28, 47), Cells(33, 55))
+    For Each cell In invRange
+        If cell.Value = ptrap Then
+            Cells(r(0), c(0)).Value = ptrap
+        End If
+    Next cell
+    '    Debug.Print ("Placing item")
+    '    If (ActiveCell.Value = ptrap) Then
+    '        Cells(r(0), c(0)).Value = ActiveCell.Value
+    '        ActiveCell.Value = Null
+    '    End If
 End Sub
 
 Sub usePotion()
@@ -682,11 +689,11 @@ Function AuthorityLevelCheck(level As Integer)
             firstHint = True
         End If
         If spaceDiscovered >= 100 And authorityLevel = 0 And Range("U10").Value = mothman And secondHint = False Then
-            MsgBox "I should listen to the frog. I can change anything in this world."
+            MsgBox "I have the power. I can change anything in this world."
             secondHint = True
         End If
         If spaceDiscovered >= 150 And authorityLevel = 0 And Range("U10").Value = mothman And thirdHint = False Then
-            MsgBox "Wait this is excel I can change any of the values"
+            MsgBox "Wait this is excel I can change any of the values. Even if they are infinity"
             thirdHint = True
         End If
     End If
@@ -816,8 +823,8 @@ Sub RenderImages()
                     
             Image.Top = cell.Top
             Image.Left = cell.Left
-            Image.ShapeRange.Height = gameHeight + 200
-            Image.ShapeRange.Width = gameHeight + 200
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight + 5
 
         End If
 
@@ -1290,6 +1297,15 @@ Sub ImgToUI()
             Image.ShapeRange.Width = gameHeight + 5
 
         End If
+        If cell.Value = ptrap Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\setTrap.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight + 5
+
+        End If
     Next cell
 End Sub
 Sub RemoveInventory(invValue As Integer)
@@ -1739,10 +1755,10 @@ Function LoadLevel(level As Integer)
     If level = 3 Then
         Range("A1:AR37").Interior.Color = vbBlack
         'Player pos
-        r(0) = 33 : c(0) = 38   'AJ35
+        r(0) = 33 : c(0) = 38    'AJ35
 
         'Enemies (6)
-        le_r(0) = 24 : le_c(0) = 20   'T24
+        le_r(0) = 24 : le_c(0) = 20    'T24
         le_isRevealed = False
         le_isDestroyed = False
         'Y29, Q33, H35, Z34, AM35
@@ -1863,6 +1879,7 @@ Function LoadLevel(level As Integer)
 
 
 End Function
+
 
 
 

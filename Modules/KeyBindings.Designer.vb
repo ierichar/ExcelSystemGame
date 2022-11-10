@@ -5,6 +5,7 @@
     Application.OnKey "{DOWN}", "moveDown"
     Application.OnKey "{RETURN}", "interact"
     Application.OnKey "{INSERT}", "placeItem"
+    Application.OnKey "{BREAK}", "usePotion"
 End Sub
 
 Sub moveLeft()
@@ -36,6 +37,8 @@ Sub freeKeys()
     Application.OnKey "RETURN"
     Application.OnKey "INSERT"
 End Sub
+
+
 
 
 

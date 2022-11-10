@@ -580,7 +580,7 @@ Sub RenderImages()
         End If
 
         If cell.Value = footprints Then
-            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\footprintDown.png"
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\fpDown.png"
             Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
             cell.Font.ColorIndex = 50
             Image.Top = cell.Top
@@ -1110,7 +1110,7 @@ Function LoadLevel(level As Integer)
         le_isRevealed = False
         le_isDestoryed = False
 
-        Range("G7:AB") = wall   'top wall
+        Range("G7:AB7") = wall   'top wall
         Range("G8:G28") = wall  'left wall
         Range("AB7:AB28") = wall 'right wall
         Range("H28:X28") = wall 'bottom wall
@@ -1239,6 +1239,107 @@ Function LoadLevel(level As Integer)
 
         'Shop
         Range("S10") = shop
+
+        ShowVis()
+        ShowPlayer()
+        ShowEnemy()
+    End If
+
+    'Boss Level!
+    If level = 3 Then
+        'Player pos
+        r(0) = 35 : c(0) = 36 'AJ35
+
+        'Enemies (6)
+        le_r(0) = 24 : le_c(0) = 20 'T24
+        le_isRevealed = False
+        le_isDestroyed = False
+        'Y29, Q33, H35, Z34, AM35
+
+        'Shop
+        Range("AC25") = shop
+
+        Range("G7:V7") = wall   'top wall
+        Range("Y7:AN7") = wall
+        Range("G8:G36") = wall  'left wall
+        Range("AN8:AN36") = wall 'right wall
+        Range("H36:AN35") = wall 'bottom wall
+
+        'Traps
+        Range("P25:R25") = trap
+        Range("Y25") = trap
+        Range("AB25:AB27") = trap
+        Range("AC27:AC29") = trap
+        Range("AD27") = trap
+        Range("P26") = trap
+        Range("T26:T28") = trap
+        Range("U26") = trap
+        Range("X26") = trap
+        Range("Y27:Z27") = trap
+        Range("Q28") = trap
+        Range("Y28") = trap
+        Range("O29:Q29") = trap
+        Range("M30:O30") = trap
+        Range("M31:M34") = trap
+        Range("K34:L34") = trap
+        Range("I32:I33") = trap
+        Range("J33") = trap
+        Range("K32") = trap
+        Range("I35") = trap
+        Range("R28") = trap
+        Range("U29") = trap
+        Range("Z29:Z30") = trap
+        Range("AA30") = trap
+        Range("AB31") = trap
+        Range("AC32") = trap
+        Range("AD31") = trap
+        Range("AE29:AE30") = trap
+        Range("AF31:AG31") = trap
+        Range("AH29:AH30") = trap
+        Range("W30") = trap
+        Range("X31") = trap
+        Range("V30:V33") = trap
+        Range("R31") = trap
+        Range("S30") = trap
+        Range("T31") = trap
+        Range("U32") = trap
+        Range("S33:Z33") = trap
+        Range("AA34:AB34") = trap
+        Range("Q34:S34") = trap
+        Range("Q35") = trap
+        Range("AK31:AM31") = trap
+        Range("AM32") = trap
+        Range("AI32") = trap
+        Range("AF33:AJ33") = trap
+        Range("AE34") = trap
+        Range("AD35") = trap
+        Range("AL35") = trap
+
+        'Mushrooms
+        Range("P24") = mushroom
+        Range("U25") = mushroom
+        Range("AE24") = mushroom
+        Range("R35") = mushroom
+        Range("Z32") = mushroom
+
+        'Rocks
+        Range("Q26") = rock
+
+        'Puddles
+        Range("V26") = puddle
+        Range("T34") = puddle
+        Range("U34") = puddle
+
+        'Shrubs
+        Range("P32") = shrub
+        Range("V34") = shrub
+        Range("AK33") = shrub
+
+        'Fireflies
+        Range("M29") = firefly
+        Range("K33") = firefly
+        Range("W31") = firefly
+        Range("AG30") = firefly
 
         ShowVis()
         ShowPlayer()

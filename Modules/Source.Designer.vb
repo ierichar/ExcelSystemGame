@@ -127,7 +127,8 @@ Sub StartGame()
     ShowEnemy
     AddUI
     
-    'set shop values
+    'set shop values and give player a trap
+    Range("AU28").Value = ptrap
     potionCount = 3
     potionBought = False
 End Sub
@@ -430,6 +431,20 @@ Sub placeItem()
         ActiveCell.Value = Null
     End If
 End Sub
+'-------------------------------Place Item-------------------------------------
+'Click on item in inventory, then press p to place it
+Sub usePotion()
+    'Debug.Print ("Placing item")
+    If (ActiveCell.Value = potion) Then
+        If health < 3 Then
+            health = health + 1
+            ActiveCell.Value = Null
+        Else
+            MsgBox ("My health is full at the moment")
+        End If
+    
+    End If
+End Sub
 
 '--------------------------------PLAYER COLLISION IN CELL ----------------------------------------
 Sub Collide()
@@ -684,7 +699,7 @@ Sub AddUI()
     ' Item inventory Area
     Range("AU28", "BC33").Interior.Color = RGB(245, 245, 220)
     'Player Traps
-    Range("AU28").Value = ptrap
+    
 
     ' Currency
     Range("AY13").Value = "Bits:"

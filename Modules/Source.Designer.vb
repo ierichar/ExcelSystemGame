@@ -962,7 +962,7 @@ Function LoadLevel(level As Integer)
         'Redraw UI
         AddUI()
         UpdateUI()
-        UpdateInventory()
+        'UpdateInventory
 
         'Player Pos
         r(0) = 31

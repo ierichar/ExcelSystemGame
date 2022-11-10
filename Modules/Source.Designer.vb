@@ -646,11 +646,11 @@ End Sub
 
 Function AuthorityLevelCheck(level As Integer)
     If level = 0 Then
-        If lightData >= 20 And spaceDiscovered >= 50 And isHalfway = False Then
+        If lightData >= 15 And spaceDiscovered >= 30 And isHalfway = False Then
             MsgBox "The USB device in your possesion whirls. A bar on the face of the device is half way full. More Light Data Needed"
             isHalfway = True
         End If
-        If lightData >= 30 And spaceDiscovered >= 100 And authorityLevel = 0 Then
+        If lightData >= 25 And spaceDiscovered >= 75 And authorityLevel = 0 Then
             MsgBox "The USB device in your possesion whirls again. It flashes with the words AUTHORITY LEVEL INCREASED"
             MsgBox "I think I heard a gate open up somewhere"
             authorityLevel = 1
@@ -658,22 +658,22 @@ Function AuthorityLevelCheck(level As Integer)
     End If
 
     If level = 1 Then
-        If lightData >= 75 And spaceDiscovered >= 60 And isHalfway = False Then
+        If lightData >= 50 And spaceDiscovered >= 60 And isHalfway = False Then
             MsgBox "The USB device in your possesion whirls. A bar on the face of the device is half way full. More Light Data Needed"
             isHalfway = True
         End If
-        If lightData >= 125 And spaceDiscovered >= 100 And authorityLevel = 0 Then
+        If lightData >= 100 And spaceDiscovered >= 100 And authorityLevel = 0 Then
             MsgBox "The USB device in your possesion whirls again. It flashes with the words AUTHORITY LEVEL INCREASED"
             MsgBox "I think I heard a gate open up somewhere"
             authorityLevel = 1
         End If
     End If
     If level = 2 Then
-        If lightData >= 150 And spaceDiscovered >= 50 And isHalfway = False Then
+        If lightData >= 125 And spaceDiscovered >= 50 And isHalfway = False Then
             MsgBox "The USB device in your possesion whirls. A bar on the face of the device is half way full. More Light Data Needed"
             isHalfway = True
         End If
-        If lightData >= 175 And spaceDiscovered >= 100 And authorityLevel = 0 Then
+        If lightData >= 150 And spaceDiscovered >= 100 And authorityLevel = 0 Then
             MsgBox "The USB device in your possesion whirls again. It flashes with the words AUTHORITY LEVEL INCREASED"
             MsgBox "I think I heard a gate open up somewhere"
             authorityLevel = 1
@@ -681,7 +681,7 @@ Function AuthorityLevelCheck(level As Integer)
     End If
     If level = 3 And bossMono = True Then
         If spaceDiscovered >= 50 And isHalfway = False And Range("U10").Value = mothman Then
-            MsgBox "There has to be some way to beat him. If I could just "
+            MsgBox "There has to be some way to beat him. If I could just reach him"
             isHalfway = True
         End If
         If spaceDiscovered >= 75 And authorityLevel = 0 And Range("U10").Value = mothman And firstHint = False Then
@@ -749,6 +749,16 @@ Sub RenderImages()
             Image.Left = cell.Left
             Image.ShapeRange.Height = gameHeight + 200
             Image.ShapeRange.Width = gameHeight + 200
+
+        End If
+        If cell.Value = shop Then
+            Image_Location = Application.ActiveWorkbook.Path + "\ExcelArtAssets\lovelandfrog.png"
+            Set Image = Sheets("Sheet1").Pictures.Insert(Image_Location)
+                    
+            Image.Top = cell.Top
+            Image.Left = cell.Left
+            Image.ShapeRange.Height = gameHeight
+            Image.ShapeRange.Width = gameHeight + 5
 
         End If
 
